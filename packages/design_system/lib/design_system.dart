@@ -9,19 +9,19 @@ export 'tema/tema_app.dart';
 export 'tema/tema_extensoes.dart';
 
 // Componentes — Botões
-// export 'componentes/botoes/ds_botao_primario.dart';
-// export 'componentes/botoes/ds_botao_secundario.dart';
-// export 'componentes/botoes/ds_botao_icone.dart';
+export 'componentes/botoes/ds_botao_primario.dart';
+export 'componentes/botoes/ds_botao_secundario.dart';
+export 'componentes/botoes/ds_botao_icone.dart';
 
 // Componentes — Cards
 // export 'componentes/cards/ds_card_hospedagem.dart';
 
 // Componentes — Inputs
-// export 'componentes/inputs/ds_text_field.dart';
+export 'componentes/inputs/ds_text_field.dart';
 
 // Componentes — Seletores
-// export 'componentes/selectores/ds_date_range_picker.dart';
-// export 'componentes/selectores/ds_dropdown.dart';
+export 'componentes/selectores/ds_date_range_picker.dart';
+export 'componentes/selectores/ds_dropdown.dart';
 
 // Componentes — Listas
 // export 'componentes/listas/ds_lista.dart';
