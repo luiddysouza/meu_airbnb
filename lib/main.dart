@@ -1,6 +1,12 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
-void main() {
+import 'core/di/injecao.dart';
+import 'core/roteamento/rotas.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await inicializarDependencias();
   runApp(const MeuAirbnbApp());
 }
 
@@ -9,13 +15,11 @@ class MeuAirbnbApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp.router(
       title: 'meu_airbnb',
-      home: Scaffold(
-        body: Center(
-          child: Text('meu_airbnb — em construção'),
-        ),
-      ),
+      theme: DsTemaApp.tema,
+      routerConfig: roteador,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
