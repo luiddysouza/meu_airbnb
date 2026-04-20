@@ -33,5 +33,5 @@ export 'componentes/feedback/ds_carregando.dart';
 export 'componentes/feedback/ds_snackbar.dart';
 
 // Componentes — Layout
-// export 'componentes/layout/ds_scaffold_responsivo.dart';
-// export 'componentes/layout/ds_app_bar_adaptativa.dart';
+export 'componentes/layout/ds_scaffold_responsivo.dart';
+export 'componentes/layout/ds_app_bar_adaptativa.dart';
