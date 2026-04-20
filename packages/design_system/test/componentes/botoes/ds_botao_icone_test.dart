@@ -6,9 +6,11 @@ void main() {
   group('DsBotaoIcone', () {
     testWidgets('renderiza com icone', (WidgetTester tester) async {
       // Arrange
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(body: DsBotaoIcone(icone: Icons.delete)),
-      ));
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: DsBotaoIcone(icone: Icons.delete)),
+        ),
+      );
 
       // Assert
       expect(find.byIcon(Icons.delete), findsOneWidget);
@@ -17,14 +19,16 @@ void main() {
     testWidgets('dispara aoTocar ao pressionar', (WidgetTester tester) async {
       // Arrange
       var tocado = false;
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: DsBotaoIcone(
-            icone: Icons.delete,
-            aoTocar: () => tocado = true,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DsBotaoIcone(
+              icone: Icons.delete,
+              aoTocar: () => tocado = true,
+            ),
           ),
         ),
-      ));
+      );
 
       // Act
       await tester.tap(find.byType(DsBotaoIcone));
@@ -34,27 +38,33 @@ void main() {
       expect(tocado, isTrue);
     });
 
-    testWidgets('exibe CircularProgressIndicator quando carregando',
-        (WidgetTester tester) async {
+    testWidgets('exibe CircularProgressIndicator quando carregando', (
+      WidgetTester tester,
+    ) async {
       // Arrange
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: DsBotaoIcone(icone: Icons.delete, carregando: true),
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DsBotaoIcone(icone: Icons.delete, carregando: true),
+          ),
         ),
-      ));
+      );
 
       // Assert
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('renderiza Tooltip quando tooltip fornecido',
-        (WidgetTester tester) async {
+    testWidgets('renderiza Tooltip quando tooltip fornecido', (
+      WidgetTester tester,
+    ) async {
       // Arrange
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: DsBotaoIcone(icone: Icons.delete, tooltip: 'Excluir'),
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DsBotaoIcone(icone: Icons.delete, tooltip: 'Excluir'),
+          ),
         ),
-      ));
+      );
 
       // Assert
       expect(find.byType(Tooltip), findsOneWidget);

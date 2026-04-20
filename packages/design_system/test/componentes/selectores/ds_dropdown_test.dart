@@ -11,33 +11,38 @@ void main() {
 
     testWidgets('renderiza com rotulo', (WidgetTester tester) async {
       // Arrange
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: DsDropdown(
-            rotulo: 'Imovel',
-            opcoes: opcoes,
-            aoSelecionar: (_) {},
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DsDropdown(
+              rotulo: 'Imovel',
+              opcoes: opcoes,
+              aoSelecionar: (_) {},
+            ),
           ),
         ),
-      ));
+      );
 
       // Assert
       expect(find.text('Imovel'), findsOneWidget);
     });
 
-    testWidgets('dispara aoSelecionar ao escolher opcao',
-        (WidgetTester tester) async {
+    testWidgets('dispara aoSelecionar ao escolher opcao', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       String? valorSelecionado;
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: DsDropdown(
-            rotulo: 'Imovel',
-            opcoes: opcoes,
-            aoSelecionar: (valor) => valorSelecionado = valor,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DsDropdown(
+              rotulo: 'Imovel',
+              opcoes: opcoes,
+              aoSelecionar: (valor) => valorSelecionado = valor,
+            ),
           ),
         ),
-      ));
+      );
 
       // Act
       await tester.tap(find.byType(DsDropdown));
@@ -49,38 +54,44 @@ void main() {
       expect(valorSelecionado, 'op1');
     });
 
-    testWidgets('exibe valor selecionado quando valorSelecionado fornecido',
-        (WidgetTester tester) async {
+    testWidgets('exibe valor selecionado quando valorSelecionado fornecido', (
+      WidgetTester tester,
+    ) async {
       // Arrange
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: DsDropdown(
-            rotulo: 'Imovel',
-            opcoes: opcoes,
-            valorSelecionado: 'op2',
-            aoSelecionar: (_) {},
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DsDropdown(
+              rotulo: 'Imovel',
+              opcoes: opcoes,
+              valorSelecionado: 'op2',
+              aoSelecionar: (_) {},
+            ),
           ),
         ),
-      ));
+      );
 
       // Assert
       expect(find.text('Opcao 2'), findsOneWidget);
     });
 
-    testWidgets('nao dispara aoSelecionar quando desabilitado',
-        (WidgetTester tester) async {
+    testWidgets('nao dispara aoSelecionar quando desabilitado', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       var chamado = false;
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: DsDropdown(
-            rotulo: 'Imovel',
-            opcoes: opcoes,
-            habilitado: false,
-            aoSelecionar: (_) => chamado = true,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DsDropdown(
+              rotulo: 'Imovel',
+              opcoes: opcoes,
+              habilitado: false,
+              aoSelecionar: (_) => chamado = true,
+            ),
           ),
         ),
-      ));
+      );
 
       // Act
       await tester.tap(find.byType(DsDropdown), warnIfMissed: false);

@@ -49,27 +49,39 @@ class DsTextField extends StatelessWidget {
         helperText: textoHelper,
         prefixIcon: prefixIcone != null ? Icon(prefixIcone) : null,
         border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(DsEspacamentos.radiusSm),
+          ),
           borderSide: BorderSide(color: DsCores.cinza300),
         ),
         enabledBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(DsEspacamentos.radiusSm),
+          ),
           borderSide: BorderSide(color: DsCores.cinza300),
         ),
         focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(DsEspacamentos.radiusSm),
+          ),
           borderSide: BorderSide(color: DsCores.primaria, width: 2),
         ),
         errorBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(DsEspacamentos.radiusSm),
+          ),
           borderSide: BorderSide(color: DsCores.erro),
         ),
         focusedErrorBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(DsEspacamentos.radiusSm),
+          ),
           borderSide: BorderSide(color: DsCores.erro, width: 2),
         ),
         disabledBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(DsEspacamentos.radiusSm),
+          ),
           borderSide: BorderSide(color: DsCores.cinza100),
         ),
         contentPadding: const EdgeInsets.symmetric(

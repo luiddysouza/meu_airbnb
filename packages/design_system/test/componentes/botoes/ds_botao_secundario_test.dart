@@ -6,9 +6,11 @@ void main() {
   group('DsBotaoSecundario', () {
     testWidgets('renderiza com rotulo', (WidgetTester tester) async {
       // Arrange
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(body: DsBotaoSecundario(rotulo: 'Cancelar')),
-      ));
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: DsBotaoSecundario(rotulo: 'Cancelar')),
+        ),
+      );
 
       // Assert
       expect(find.text('Cancelar'), findsOneWidget);
@@ -17,14 +19,16 @@ void main() {
     testWidgets('dispara aoTocar ao pressionar', (WidgetTester tester) async {
       // Arrange
       var tocado = false;
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: DsBotaoSecundario(
-            rotulo: 'Cancelar',
-            aoTocar: () => tocado = true,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DsBotaoSecundario(
+              rotulo: 'Cancelar',
+              aoTocar: () => tocado = true,
+            ),
           ),
         ),
-      ));
+      );
 
       // Act
       await tester.tap(find.byType(DsBotaoSecundario));
@@ -34,14 +38,17 @@ void main() {
       expect(tocado, isTrue);
     });
 
-    testWidgets('exibe CircularProgressIndicator quando carregando',
-        (WidgetTester tester) async {
+    testWidgets('exibe CircularProgressIndicator quando carregando', (
+      WidgetTester tester,
+    ) async {
       // Arrange
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: DsBotaoSecundario(rotulo: 'Cancelar', carregando: true),
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DsBotaoSecundario(rotulo: 'Cancelar', carregando: true),
+          ),
         ),
-      ));
+      );
 
       // Assert
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -50,11 +57,13 @@ void main() {
 
     testWidgets('renderiza com icone', (WidgetTester tester) async {
       // Arrange
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: DsBotaoSecundario(rotulo: 'Editar', icone: Icons.edit),
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DsBotaoSecundario(rotulo: 'Editar', icone: Icons.edit),
+          ),
         ),
-      ));
+      );
 
       // Assert
       expect(find.byIcon(Icons.edit), findsOneWidget);

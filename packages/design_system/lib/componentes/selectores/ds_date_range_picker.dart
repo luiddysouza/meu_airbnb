@@ -37,9 +37,9 @@ class DsDateRangePicker extends StatelessWidget {
       initialDateRange: periodoSelecionado,
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: Theme.of(context).colorScheme.copyWith(
-                primary: DsCores.primaria,
-              ),
+          colorScheme: Theme.of(
+            context,
+          ).colorScheme.copyWith(primary: DsCores.primaria),
         ),
         child: child!,
       ),
@@ -86,17 +86,23 @@ class _CampoData extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: aoTocar,
-      borderRadius: const BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+      borderRadius: const BorderRadius.all(
+        Radius.circular(DsEspacamentos.radiusSm),
+      ),
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: rotulo,
           suffixIcon: const Icon(Icons.calendar_today, size: 18),
           border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+            borderRadius: BorderRadius.all(
+              Radius.circular(DsEspacamentos.radiusSm),
+            ),
             borderSide: BorderSide(color: DsCores.cinza300),
           ),
           enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+            borderRadius: BorderRadius.all(
+              Radius.circular(DsEspacamentos.radiusSm),
+            ),
             borderSide: BorderSide(color: DsCores.cinza300),
           ),
           contentPadding: const EdgeInsets.symmetric(

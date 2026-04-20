@@ -30,7 +30,9 @@ class DsBotaoSecundario extends StatelessWidget {
           vertical: DsEspacamentos.md,
         ),
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusMd)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(DsEspacamentos.radiusMd),
+          ),
         ),
         textStyle: DsTipografia.labelLarge,
         minimumSize: const Size(double.infinity, 48),

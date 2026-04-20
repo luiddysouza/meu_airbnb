@@ -38,7 +38,9 @@ class DsBotaoIcone extends StatelessWidget {
       padding: const EdgeInsets.all(DsEspacamentos.xs),
       style: IconButton.styleFrom(
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(DsEspacamentos.radiusSm)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(DsEspacamentos.radiusSm),
+          ),
         ),
       ),
     );
