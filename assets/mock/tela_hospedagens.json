@@ -1,0 +1,35 @@
+{
+    "tela": "hospedagens",
+    "componentes": [
+        {
+            "tipo": "seletor_data_range",
+            "propriedades": {
+                "rotulo_inicio": "Check-in",
+                "rotulo_fim": "Check-out"
+            },
+            "acao": {
+                "tipo": "filtrar_por_data",
+                "payload": {}
+            }
+        },
+        {
+            "tipo": "dropdown",
+            "propriedades": {
+                "rotulo": "Imóvel",
+                "opcoes_source": "imoveis"
+            },
+            "acao": {
+                "tipo": "filtrar_por_imovel",
+                "payload": {}
+            }
+        },
+        {
+            "tipo": "lista",
+            "propriedades": {
+                "item_tipo": "card_hospedagem",
+                "dados_source": "hospedagens_filtradas",
+                "vazio_mensagem": "Nenhuma hospedagem encontrada"
+            }
+        }
+    ]
+}
