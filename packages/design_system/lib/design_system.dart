@@ -24,7 +24,7 @@ export 'componentes/selectores/ds_date_range_picker.dart';
 export 'componentes/selectores/ds_dropdown.dart';
 
 // Componentes — Listas
-// export 'componentes/listas/ds_lista.dart';
+export 'componentes/listas/ds_lista.dart';
 export 'componentes/listas/ds_list_tile.dart';
 
 // Componentes — Feedback
