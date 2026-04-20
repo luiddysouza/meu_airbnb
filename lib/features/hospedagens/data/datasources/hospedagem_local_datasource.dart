@@ -1,11 +1,11 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-import '../../dominio/entidades/hospedagem_entidade.dart';
-import '../../dominio/entidades/imovel_entidade.dart';
-import '../modelos/hospedagem_modelo.dart';
-import '../modelos/imovel_modelo.dart';
+import '../../domain/entities/hospedagem_entity.dart';
+import '../../domain/entities/imovel_entity.dart';
+import '../models/hospedagem_model.dart';
+import '../models/imovel_model.dart';
 
 /// Datasource local que carrega os dados mock de assets e os mantém em memória.
 ///
@@ -18,8 +18,8 @@ class HospedagemLocalDataSource {
   static const String _caminhoHospedagens = 'assets/mock/hospedagens.json';
   static const String _caminhoImoveis = 'assets/mock/imoveis.json';
 
-  List<HospedagemEntidade> _hospedagens = [];
-  List<ImovelEntidade> _imoveis = [];
+  List<HospedagemEntity> _hospedagens = [];
+  List<ImovelEntity> _imoveis = [];
   bool _inicializado = false;
 
   /// Carrega os dados dos arquivos de asset para memória.
@@ -37,29 +37,29 @@ class HospedagemLocalDataSource {
     _hospedagens = listaHospedagens
         .map(
           (e) =>
-              HospedagemModelo.fromJson(e as Map<String, dynamic>).toEntity(),
+              HospedagemModel.fromJson(e as Map<String, dynamic>).toEntity(),
         )
         .toList();
 
     _imoveis = listaImoveis
-        .map((e) => ImovelModelo.fromJson(e as Map<String, dynamic>).toEntity())
+        .map((e) => ImovelModel.fromJson(e as Map<String, dynamic>).toEntity())
         .toList();
 
     _inicializado = true;
   }
 
-  Future<List<HospedagemEntidade>> obterTodas() async {
+  Future<List<HospedagemEntity>> obterTodas() async {
     await _simularLatencia();
     return List.unmodifiable(_hospedagens);
   }
 
-  Future<HospedagemEntidade> adicionar(HospedagemEntidade hospedagem) async {
+  Future<HospedagemEntity> adicionar(HospedagemEntity hospedagem) async {
     await _simularLatencia();
     _hospedagens.add(hospedagem);
     return hospedagem;
   }
 
-  Future<HospedagemEntidade> atualizar(HospedagemEntidade hospedagem) async {
+  Future<HospedagemEntity> atualizar(HospedagemEntity hospedagem) async {
     await _simularLatencia();
     final indice = _hospedagens.indexWhere((h) => h.id == hospedagem.id);
     if (indice == -1) {
@@ -78,7 +78,7 @@ class HospedagemLocalDataSource {
     }
   }
 
-  Future<List<ImovelEntidade>> obterImoveis() async {
+  Future<List<ImovelEntity>> obterImoveis() async {
     await _simularLatencia();
     return List.unmodifiable(_imoveis);
   }

@@ -1,11 +1,11 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meu_airbnb/core/sdui/cubit/sdui_cubit.dart';
-import 'package:meu_airbnb/core/sdui/cubit/sdui_estado.dart';
-import 'package:meu_airbnb/core/sdui/modelos/no_sdui.dart';
+import 'package:meu_airbnb/core/sdui/cubit/sdui_state.dart';
+import 'package:meu_airbnb/core/sdui/models/sdui_node.dart';
 
 /// JSON SDUI mínimo válido, usado como asset fictício nos testes.
 const _jsonValido = '''
@@ -43,63 +43,63 @@ void _registrarAsset(String caminho, String conteudo) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('SduiEstado', () {
-    test('SduiInicial é igual a outra SduiInicial', () {
-      expect(const SduiInicial(), equals(const SduiInicial()));
+  group('SduiState', () {
+    test('SduiInitial é igual a outra SduiInitial', () {
+      expect(const SduiInitial(), equals(const SduiInitial()));
     });
 
-    test('SduiCarregando é igual a outra SduiCarregando', () {
-      expect(const SduiCarregando(), equals(const SduiCarregando()));
+    test('SduiLoading é igual a outra SduiLoading', () {
+      expect(const SduiLoading(), equals(const SduiLoading()));
     });
 
-    test('SduiSucesso com mesma arvore são iguais', () {
-      const arvore = [NoSdui(tipo: 'botao_primario')];
-      expect(const SduiSucesso(arvore), equals(const SduiSucesso(arvore)));
+    test('SduiSuccess com mesma arvore são iguais', () {
+      const arvore = [SduiNode(tipo: 'botao_primario')];
+      expect(const SduiSuccess(arvore), equals(const SduiSuccess(arvore)));
     });
 
-    test('SduiErro com mesma mensagem são iguais', () {
-      expect(const SduiErro('falha'), equals(const SduiErro('falha')));
+    test('SduiError com mesma mensagem são iguais', () {
+      expect(const SduiError('Failure'), equals(const SduiError('Failure')));
     });
 
-    test('SduiErro com mensagens diferentes não são iguais', () {
-      expect(const SduiErro('a'), isNot(equals(const SduiErro('b'))));
+    test('SduiError com mensagens diferentes não são iguais', () {
+      expect(const SduiError('a'), isNot(equals(const SduiError('b'))));
     });
   });
 
   group('SduiCubit', () {
-    test('estado inicial é SduiInicial', () {
-      expect(SduiCubit().state, isA<SduiInicial>());
+    test('estado inicial é SduiInitial', () {
+      expect(SduiCubit().state, isA<SduiInitial>());
     });
 
-    test('arvoreAtual retorna null quando estado é SduiInicial', () {
+    test('arvoreAtual retorna null quando estado é SduiInitial', () {
       expect(SduiCubit().arvoreAtual, isNull);
     });
 
-    blocTest<SduiCubit, SduiEstado>(
-      'carregarTela emite [SduiCarregando, SduiSucesso] com JSON válido',
+    blocTest<SduiCubit, SduiState>(
+      'carregarTela emite [SduiLoading, SduiSuccess] com JSON válido',
       setUp: () => _registrarAsset('assets/mock/tela_teste.json', _jsonValido),
       build: () => SduiCubit(),
       act: (cubit) =>
           cubit.carregarTela(caminhoAsset: 'assets/mock/tela_teste.json'),
-      expect: () => [const SduiCarregando(), isA<SduiSucesso>()],
+      expect: () => [const SduiLoading(), isA<SduiSuccess>()],
     );
 
-    blocTest<SduiCubit, SduiEstado>(
-      'SduiSucesso contém a arvore parseada corretamente',
+    blocTest<SduiCubit, SduiState>(
+      'SduiSuccess contém a arvore parseada corretamente',
       setUp: () => _registrarAsset('assets/mock/tela_teste.json', _jsonValido),
       build: () => SduiCubit(),
       act: (cubit) =>
           cubit.carregarTela(caminhoAsset: 'assets/mock/tela_teste.json'),
       verify: (cubit) {
-        final estado = cubit.state as SduiSucesso;
+        final estado = cubit.state as SduiSuccess;
         expect(estado.arvore.length, 2);
         expect(estado.arvore[0].tipo, 'botao_primario');
         expect(estado.arvore[1].tipo, 'estado_vazio');
       },
     );
 
-    blocTest<SduiCubit, SduiEstado>(
-      'arvoreAtual retorna a lista após SduiSucesso',
+    blocTest<SduiCubit, SduiState>(
+      'arvoreAtual retorna a lista após SduiSuccess',
       setUp: () => _registrarAsset('assets/mock/tela_teste.json', _jsonValido),
       build: () => SduiCubit(),
       act: (cubit) =>
@@ -110,30 +110,30 @@ void main() {
       },
     );
 
-    blocTest<SduiCubit, SduiEstado>(
-      'carregarTela emite [SduiCarregando, SduiErro] com JSON inválido',
+    blocTest<SduiCubit, SduiState>(
+      'carregarTela emite [SduiLoading, SduiError] com JSON inválido',
       setUp: () =>
           _registrarAsset('assets/mock/tela_invalida.json', _jsonInvalido),
       build: () => SduiCubit(),
       act: (cubit) =>
           cubit.carregarTela(caminhoAsset: 'assets/mock/tela_invalida.json'),
-      expect: () => [const SduiCarregando(), isA<SduiErro>()],
+      expect: () => [const SduiLoading(), isA<SduiError>()],
     );
 
-    blocTest<SduiCubit, SduiEstado>(
-      'SduiErro contém mensagem sobre JSON inválido',
+    blocTest<SduiCubit, SduiState>(
+      'SduiError contém mensagem sobre JSON inválido',
       setUp: () =>
           _registrarAsset('assets/mock/tela_invalida.json', _jsonInvalido),
       build: () => SduiCubit(),
       act: (cubit) =>
           cubit.carregarTela(caminhoAsset: 'assets/mock/tela_invalida.json'),
       verify: (cubit) {
-        final estado = cubit.state as SduiErro;
+        final estado = cubit.state as SduiError;
         expect(estado.mensagem, contains('JSON inválido'));
       },
     );
 
-    blocTest<SduiCubit, SduiEstado>(
+    blocTest<SduiCubit, SduiState>(
       'carregarTela pode ser chamado múltiplas vezes',
       setUp: () => _registrarAsset('assets/mock/tela_teste.json', _jsonValido),
       build: () => SduiCubit(),
@@ -142,10 +142,10 @@ void main() {
         await cubit.carregarTela(caminhoAsset: 'assets/mock/tela_teste.json');
       },
       expect: () => [
-        const SduiCarregando(),
-        isA<SduiSucesso>(),
-        const SduiCarregando(),
-        isA<SduiSucesso>(),
+        const SduiLoading(),
+        isA<SduiSuccess>(),
+        const SduiLoading(),
+        isA<SduiSuccess>(),
       ],
     );
   });

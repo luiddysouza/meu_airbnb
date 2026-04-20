@@ -1,4 +1,4 @@
-# Server-Driven UI (SDUI) — meu_airbnb
+﻿# Server-Driven UI (SDUI) — meu_airbnb
 
 ## O que é Server-Driven UI?
 
@@ -31,13 +31,13 @@ A engine é composta por 5 peças que formam um pipeline linear:
 JSON (String)
   │
   ▼
-SduiParser         →  parsear(json) → List<NoSdui>
+SduiParser         →  parsear(json) → List<SduiNode>
   │
   ▼
-SduiCubit          →  carregarTela() → emite SduiEstado
+SduiCubit          →  carregarTela() → emite SduiState
   │
   ▼
-SduiRenderer       →  percorre List<NoSdui> recursivamente
+SduiRenderer       →  percorre List<SduiNode> recursivamente
   │
   ▼
 WidgetFactory      →  construir(no) → Widget do Design System
@@ -52,18 +52,18 @@ Cada peça tem uma única responsabilidade e pode ser testada isoladamente. Nenh
 
 ```
 lib/core/sdui/
-├── modelos/
-│   ├── no_sdui.dart          # Nó da árvore
-│   └── acao_sdui.dart        # Ação associada a um nó
+├── models/
+│   ├── sdui_node.dart          # Nó da árvore
+│   └── sdui_action.dart        # Ação associada a um nó
 ├── parser/
-│   └── sdui_parser.dart      # JSON String → List<NoSdui>
-├── renderizador/
-│   └── sdui_renderer.dart    # List<NoSdui> → Widget tree
-├── fabrica/
+│   └── sdui_parser.dart      # JSON String → List<SduiNode>
+├── renderer/
+│   └── sdui_renderer.dart    # List<SduiNode> → Widget tree
+├── factory/
 │   └── widget_factory.dart   # Registry tipo → builder
 └── cubit/
     ├── sdui_cubit.dart       # Orquestra o pipeline
-    └── sdui_estado.dart      # Estados: Inicial, Carregando, Sucesso, Erro
+    └── sdui_state.dart      # Estados: Inicial, Carregando, Sucesso, Erro
 ```
 
 ---
@@ -151,15 +151,15 @@ Note que o JSON não contém dados de negócio — apenas referências a fontes 
 
 ---
 
-## Peça 1: Modelos — NoSdui e AcaoSdui
+## Peça 1: Modelos — SduiNode e SduiAction
 
 Os modelos são a representação Dart do schema JSON. São classes `Equatable` e imutáveis.
 
-### NoSdui
+### SduiNode
 
 ```dart
-class NoSdui extends Equatable {
-  const NoSdui({
+class SduiNode extends Equatable {
+  const SduiNode({
     required this.tipo,
     this.propriedades = const {},
     this.filhos = const [],
@@ -168,28 +168,28 @@ class NoSdui extends Equatable {
 
   final String tipo;
   final Map<String, dynamic> propriedades;
-  final List<NoSdui> filhos;
-  final AcaoSdui? acao;
+  final List<SduiNode> filhos;
+  final SduiAction? acao;
 
-  factory NoSdui.fromJson(Map<String, dynamic> json) { ... }
+  factory SduiNode.fromJson(Map<String, dynamic> json) { ... }
 }
 ```
 
 **Pontos-chave:**
-- `filhos` é uma lista de `NoSdui` — isso cria a **recursividade**. Um nó pode conter nós filhos, que por sua vez podem conter mais filhos, formando uma árvore.
+- `filhos` é uma lista de `SduiNode` — isso cria a **recursividade**. Um nó pode conter nós filhos, que por sua vez podem conter mais filhos, formando uma árvore.
 - `propriedades` é um `Map<String, dynamic>` porque cada tipo de widget tem propriedades diferentes. O `WidgetFactory` é quem sabe interpretar esse mapa para cada tipo.
 - `Equatable` permite comparar nós por valor, essencial para o `bloc_test` comparar estados do Cubit.
 
-### AcaoSdui
+### SduiAction
 
 ```dart
-class AcaoSdui extends Equatable {
-  const AcaoSdui({required this.tipo, this.payload = const {}});
+class SduiAction extends Equatable {
+  const SduiAction({required this.tipo, this.payload = const {}});
 
   final String tipo;
   final Map<String, dynamic> payload;
 
-  factory AcaoSdui.fromJson(Map<String, dynamic> json) { ... }
+  factory SduiAction.fromJson(Map<String, dynamic> json) { ... }
 }
 ```
 
@@ -197,15 +197,15 @@ A ação é um VO (Value Object) simples. O `tipo` identifica qual handler execu
 
 ---
 
-## Peça 2: SduiParser — JSON → List\<NoSdui\>
+## Peça 2: SduiParser — JSON → List\<SduiNode\>
 
 ```dart
 abstract final class SduiParser {
-  static List<NoSdui> parsear(String jsonString) {
+  static List<SduiNode> parsear(String jsonString) {
     final mapa = jsonDecode(jsonString) as Map<String, dynamic>;
     final componentes = mapa['componentes'] as List<dynamic>? ?? [];
     return componentes
-        .map((item) => NoSdui.fromJson(item as Map<String, dynamic>))
+        .map((item) => SduiNode.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 }
@@ -215,7 +215,7 @@ abstract final class SduiParser {
 
 **Contrato:**
 - Entrada: `String` JSON com chave `componentes` contendo um array de nós
-- Saída: `List<NoSdui>` — a árvore parseada
+- Saída: `List<SduiNode>` — a árvore parseada
 - Erro: lança `FormatException` se o JSON for inválido
 
 **O que o parser NÃO faz:**
@@ -236,8 +236,8 @@ O `WidgetFactory` é o coração da engine. Ele mantém um `Map<String, BuilderS
 ```dart
 typedef BuilderSdui = Widget Function(
   BuildContext context,
-  NoSdui no,
-  Widget Function(BuildContext, NoSdui) renderizarFilho,
+  SduiNode no,
+  Widget Function(BuildContext, SduiNode) renderizarFilho,
 );
 ```
 
@@ -246,7 +246,7 @@ Cada builder recebe:
 2. `no` — o nó SDUI sendo processado (com suas propriedades, filhos, ação)
 3. `renderizarFilho` — um callback para renderizar nós filhos recursivamente
 
-O terceiro parâmetro é o que permite composição. Um builder de "coluna" pode chamar `renderizarFilho` para cada filho na lista `no.filhos`, montando uma árvore de widgets sem limite de profundidade.
+O terceiro parâmetro é o que permite composição. Um builder de "coluna" pode call `renderizarFilho` para cada filho na lista `no.filhos`, montando uma árvore de widgets sem limite de profundidade.
 
 ### API pública
 
@@ -281,8 +281,8 @@ Se um JSON contiver `"tipo": "componente_novo"` e esse tipo não estiver registr
 ```dart
 static Widget _buildSeletorDataRange(
   BuildContext context,
-  NoSdui no,
-  Widget Function(BuildContext, NoSdui) renderizarFilho,
+  SduiNode no,
+  Widget Function(BuildContext, SduiNode) renderizarFilho,
 ) {
   final props = no.propriedades;
   return DsDateRangePicker(
@@ -310,10 +310,10 @@ class SduiRenderer extends StatelessWidget {
     required this.fabrica,
   });
 
-  final List<NoSdui> nos;
+  final List<SduiNode> nos;
   final WidgetFactory fabrica;
 
-  Widget _renderizarNo(BuildContext context, NoSdui no) {
+  Widget _renderizarNo(BuildContext context, SduiNode no) {
     return fabrica.construir(context, no, _renderizarNo);
   }
 
@@ -328,7 +328,7 @@ class SduiRenderer extends StatelessWidget {
 ```
 
 O renderer é propositalmente simples. Ele:
-1. Recebe a lista de nós raiz (`nos`) e a fábrica de widgets (`fabrica`)
+1. Recebe a lista de nós raiz (`nos`) e a fábrica de widgets (`factory`)
 2. Para cada nó raiz, chama `_renderizarNo`
 3. `_renderizarNo` delega para `fabrica.construir`, passando **a si mesmo** como callback de renderização recursiva
 
@@ -353,12 +353,12 @@ O Cubit orquestra o pipeline: carrega o JSON, parseia, e emite o resultado como 
 ### Estados
 
 ```dart
-sealed class SduiEstado extends Equatable { ... }
+sealed class SduiState extends Equatable { ... }
 
-final class SduiInicial     extends SduiEstado { ... }
-final class SduiCarregando  extends SduiEstado { ... }
-final class SduiSucesso     extends SduiEstado { List<NoSdui> arvore; }
-final class SduiErro        extends SduiEstado { String mensagem; }
+final class SduiInitial     extends SduiState { ... }
+final class SduiLoading  extends SduiState { ... }
+final class SduiSuccess     extends SduiState { List<SduiNode> arvore; }
+final class SduiError        extends SduiState { String mensagem; }
 ```
 
 **Por que `sealed class`?** — Garante que o compilador sabe de todos os subtipos. Em um `switch` ou `BlocBuilder`, o Dart avisa se você esquecer de tratar um estado. É mais seguro que uma classe abstrata aberta.
@@ -367,15 +367,15 @@ final class SduiErro        extends SduiEstado { String mensagem; }
 
 ```dart
 Future<void> carregarTela({String caminhoAsset = _caminhoAsset}) async {
-  emit(const SduiCarregando());          // 1. UI mostra loading
+  emit(const SduiLoading());          // 1. UI mostra loading
   try {
     final json = await rootBundle.loadString(caminhoAsset);  // 2. Carrega
     final arvore = SduiParser.parsear(json);                 // 3. Parseia
-    emit(SduiSucesso(arvore));                               // 4. Sucesso
+    emit(SduiSuccess(arvore));                               // 4. Sucesso
   } on FormatException catch (e) {
-    emit(SduiErro('JSON inválido: ${e.message}'));           // 4. Erro parse
+    emit(SduiError('JSON inválido: ${e.message}'));           // 4. Erro parse
   } catch (e) {
-    emit(SduiErro('Erro ao carregar tela: $e'));             // 4. Erro geral
+    emit(SduiError('Erro ao carregar tela: $e'));             // 4. Erro geral
   }
 }
 ```
@@ -385,12 +385,12 @@ O método é `async` porque `rootBundle.loadString` é assíncrono. Quando troca
 ### Consumo na tela
 
 ```dart
-BlocBuilder<SduiCubit, SduiEstado>(
+BlocBuilder<SduiCubit, SduiState>(
   builder: (context, estado) => switch (estado) {
-    SduiInicial()    => const SizedBox.shrink(),
-    SduiCarregando() => const DsCarregando(),
-    SduiErro(:final mensagem) => DsEstadoVazio(mensagem: mensagem),
-    SduiSucesso(:final arvore) => SduiRenderer(
+    SduiInitial()    => const SizedBox.shrink(),
+    SduiLoading() => const DsCarregando(),
+    SduiError(:final mensagem) => DsEstadoVazio(mensagem: mensagem),
+    SduiSuccess(:final arvore) => SduiRenderer(
       nos: arvore,
       fabrica: WidgetFactory.padrao(),
     ),
@@ -398,7 +398,7 @@ BlocBuilder<SduiCubit, SduiEstado>(
 )
 ```
 
-O `BlocBuilder` reage a cada estado emitido pelo Cubit. Quando o estado é `SduiSucesso`, o `SduiRenderer` renderiza a árvore inteira a partir da lista de nós.
+O `BlocBuilder` reage a cada estado emitido pelo Cubit. Quando o estado é `SduiSuccess`, o `SduiRenderer` renderiza a árvore inteira a partir da lista de nós.
 
 ---
 
@@ -409,7 +409,7 @@ Reunindo todas as peças:
 ```
 1. App inicia
    └── SduiCubit.carregarTela()
-        └── emit(SduiCarregando)
+        └── emit(SduiLoading)
              └── UI exibe DsCarregando
 
 2. rootBundle.loadString('assets/mock/tela_hospedagens.json')
@@ -418,9 +418,9 @@ Reunindo todas as peças:
 3. SduiParser.parsear(json)
    └── jsonDecode → Map
         └── map['componentes'] → List<dynamic>
-             └── .map(NoSdui.fromJson) → List<NoSdui>
+             └── .map(SduiNode.fromJson) → List<SduiNode>
 
-4. emit(SduiSucesso(arvore))
+4. emit(SduiSuccess(arvore))
    └── BlocBuilder reconstrói
 
 5. SduiRenderer(nos: arvore, fabrica: WidgetFactory.padrao())
@@ -455,7 +455,7 @@ Este é o ponto arquitetural mais importante do projeto. A engine SDUI define a 
 Na integração SDUI ↔ MobX (fase futura), os builders que precisam de dados reativos vão buscar os stores via `get_it`:
 
 ```dart
-static Widget _buildLista(BuildContext context, NoSdui no, ...) {
+static Widget _buildLista(BuildContext context, SduiNode no, ...) {
   final filtroStore = GetIt.I<FiltroStore>();  // ← injeção via DI
 
   return Observer(                             // ← reatividade MobX
@@ -529,7 +529,7 @@ testWidgets('builder separador renderiza Divider', (tester) async {
       body: Builder(
         builder: (ctx) => fabrica.construir(
           ctx,
-          const NoSdui(tipo: 'separador', propriedades: {'espessura': 2}),
+          const SduiNode(tipo: 'separador', propriedades: {'espessura': 2}),
           (_, _) => const SizedBox(),
         ),
       ),
@@ -572,8 +572,8 @@ Todos seguem o padrão AAA (Arrange / Act / Assert) e usam `bloc_test` para os t
 
 ```
 JSON String
-  └── SduiParser.parsear()     → List<NoSdui>        (dados)
-       └── SduiCubit            → SduiEstado          (orquestração)
+  └── SduiParser.parsear()     → List<SduiNode>        (dados)
+       └── SduiCubit            → SduiState          (orquestração)
             └── SduiRenderer    → Widget tree          (renderização)
                  └── WidgetFactory → Widget do DS      (tradução tipo → widget)
                       └── [MobX stores via get_it]     (dados reativos, fase futura)

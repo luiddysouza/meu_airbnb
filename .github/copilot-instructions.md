@@ -1,4 +1,4 @@
-# Copilot Instructions — meu_airbnb
+﻿# Copilot Instructions — meu_airbnb
 
 Projeto Flutter (web + mobile) para gerenciamento de hospedagens de Airbnb.
 Portfólio avançado com Clean Architecture, Server-Driven UI, dois gerenciadores de estado e Design System próprio.
@@ -20,7 +20,7 @@ Presentation  →  Domain  ←  Data
 - **Domain**: entidades, use cases, contratos de repositório. Zero dependências externas.
 - **Data**: modelos (`fromJson`/`toJson`/`fromEntity`/`toEntity`), datasource em memória, `RepositorioImpl`.
 - **Presentation**: stores MobX, páginas, widgets. Acessa domínio via use cases.
-- **SDUI Engine** (`lib/core/sdui/`): parse de JSON → árvore de `NoSdui` → `WidgetFactory` → widgets do Design System.
+- **SDUI Engine** (`lib/core/sdui/`): parse de JSON → árvore de `SduiNode` → `WidgetFactory` → widgets do Design System.
 
 ### Fluxo de dados
 
@@ -31,7 +31,7 @@ JSON mock (assets/) → carrega em memória na inicialização
       → Widgets do Design System
         → Observer (flutter_mobx) envolve widgets de dados
           → MobX Stores (CRUD + Optimistic State)
-            → Use Cases → Either<Falha, T>
+            → Use Cases → Either<Failure, T>
               → Repository → DataSource (memória, simula latência)
 ```
 
@@ -51,7 +51,7 @@ JSON mock (assets/) → carrega em memória na inicialização
 ## Server-Driven UI (SDUI)
 
 - O JSON (`assets/mock/tela_hospedagens.json`) descreve a árvore de widgets por `tipo`, `propriedades`, `filhos` e `acao`.
-- `SduiParser` converte o JSON em `List<NoSdui>`.
+- `SduiParser` converte o JSON em `List<SduiNode>`.
 - `WidgetFactory` é um registry `Map<String, WidgetBuilder>` que mapeia `tipo` → Widget do Design System.
 - `SduiRenderer` percorre a árvore recursivamente e monta os widgets.
 - Widgets de **estrutura/layout** (scaffold, seletores) vêm puramente do SDUI.
@@ -85,12 +85,12 @@ JSON mock (assets/) → carrega em memória na inicialização
 
 ## Tratamento de Erros (fpdart)
 
-- Use cases **sempre** retornam `Future<Either<Falha, T>>`. Nunca lançar exceções como fluxo de controle.
-- Repository captura exceções do datasource e retorna `Left(FalhaCache(...))`.
+- Use cases **sempre** retornam `Future<Either<Failure, T>>`. Nunca lançar exceções como fluxo de controle.
+- Repository captura exceções do datasource e retorna `Left(CacheFailure(...))`.
 - MobX stores fazem `fold()`:
   - `Left` → rollback do optimistic state + seta `erro`.
   - `Right` → confirma estado, descarta snapshot.
-- Hierarquia: `Falha` (abstrata, Equatable) → `FalhaCache`, `FalhaServidor` (futuro).
+- Hierarquia: `Failure` (abstrata, Equatable) → `CacheFailure`, `ServerFailure` (futuro).
 
 ---
 
@@ -103,7 +103,7 @@ JSON mock (assets/) → carrega em memória na inicialização
    → Observer reflete na UI (feedback instantâneo)
 3. Use case chama datasource (simula latência com Future.delayed)
 4a. Right(sucesso) → descarta snapshot
-4b. Left(falha)   → restaura snapshot + seta erro → snackbar de erro
+4b. Left(Failure)   → restaura snapshot + seta erro → snackbar de erro
 ```
 
 Sempre implementar este padrão em `adicionarHospedagem`, `atualizarHospedagem`, `deletarHospedagem`.
@@ -116,18 +116,18 @@ Todo código do projeto usa **português**, incluindo variáveis, métodos, clas
 
 | Contexto | Exemplo |
 |---|---|
-| Entidades | `HospedagemEntidade`, `ImovelEntidade` |
-| Modelos | `HospedagemModelo` |
+| Entidades | `HospedagemEntity`, `ImovelEntity` |
+| Modelos | `HospedagemModel` |
 | Use cases | `ObterHospedagens`, `AdicionarHospedagem` |
-| Repositórios | `HospedagemRepositorio`, `HospedagemRepositorioImpl` |
+| Repositórios | `HospedagemRepository`, `HospedagemRepositoryImpl` |
 | Datasource | `HospedagemLocalDataSource` |
 | Stores MobX | `HospedagemStore`, `FiltroStore` |
-| Cubit | `SduiCubit`, `SduiEstado` |
-| Estados Cubit | `SduiInicial`, `SduiCarregando`, `SduiSucesso`, `SduiErro` |
+| Cubit | `SduiCubit`, `SduiState` |
+| Estados Cubit | `SduiInitial`, `SduiLoading`, `SduiSuccess`, `SduiError` |
 | Design System | `DsCardHospedagem`, `DsBotaoPrimario`, `DsDropdown` |
-| SDUI | `NoSdui`, `AcaoSdui`, `SduiParser`, `SduiRenderer`, `WidgetFactory` |
+| SDUI | `SduiNode`, `SduiAction`, `SduiParser`, `SduiRenderer`, `WidgetFactory` |
 | Enums | `StatusHospedagem.confirmada`, `Plataforma.airbnb` |
-| Erros | `Falha`, `FalhaCache`, `FalhaServidor` |
+| Erros | `Failure`, `CacheFailure`, `ServerFailure` |
 | Campos | `nomeHospede`, `checkIn`, `checkOut`, `imovelId`, `valorTotal` |
 | Métodos | `carregarHospedagens()`, `selecionarPeriodo()`, `filtrarPorImovel()` |
 
@@ -159,27 +159,27 @@ Todo código do projeto usa **português**, incluindo variáveis, métodos, clas
 ```
 lib/
 ├── core/
-│   ├── erros/         # Falha abstrata + subclasses
+│   ├── erros/         # Failure abstrata + subclasses
 │   ├── usecases/      # Contrato UseCase<Output, Params>
 │   ├── di/            # get_it setup (injecao.dart)
 │   ├── roteamento/    # go_router (rotas.dart)
 │   └── sdui/
-│       ├── modelos/   # NoSdui, AcaoSdui
+│       ├── models/   # SduiNode, SduiAction
 │       ├── parser/    # SduiParser
-│       ├── renderizador/ # SduiRenderer
-│       ├── fabrica/   # WidgetFactory
-│       └── cubit/     # SduiCubit, SduiEstado
+│       ├── renderer/ # SduiRenderer
+│       ├── factory/   # WidgetFactory
+│       └── cubit/     # SduiCubit, SduiState
 └── features/
     └── hospedagens/
         ├── data/
         │   ├── datasources/
-        │   ├── modelos/
-        │   └── repositorios/
-        ├── dominio/
-        │   ├── entidades/
-        │   ├── repositorios/
+        │   ├── models/
+        │   └── repositories/
+        ├── domain/
+        │   ├── entities/
+        │   ├── repositories/
         │   └── usecases/
-        └── apresentacao/
+        └── presentation/
             ├── stores/   # MobX (HospedagemStore, FiltroStore)
             ├── paginas/
             └── widgets/
@@ -192,10 +192,10 @@ lib/
 - **Framework**: `flutter_test` + `mockito` + `bloc_test`.
 - **Padrão**: AAA (Arrange / Act / Assert) em todos os testes.
 - **Mocks**: gerar com `@GenerateMocks([...])` do mockito.
-- **Use cases**: mock do repositório → verificar `Right` em sucesso, `Left(Falha)` em erro.
+- **Use cases**: mock do repositório → verificar `Right` em sucesso, `Left(Failure)` em erro.
 - **Repository impl**: mock do datasource → verificar conversão exceção → `Left`, valor → `Right`.
 - **MobX stores**: usar `reaction()` para capturar mudanças de observables. Testar carregamento, optimistic update e rollback.
-- **Cubit**: usar `bloc_test` com `expect: [SduiCarregando(), SduiSucesso(...)]`.
+- **Cubit**: usar `bloc_test` com `expect: [SduiLoading(), SduiSuccess(...)]`.
 - **Design System**: widget testa renderização sem erros + callbacks disparados.
 - **Cobertura mínima**: 80%.
 
@@ -219,7 +219,7 @@ flutter_mobx: ^2.x      # Observer widgets
 get_it: ^8.x            # Injeção de dependências
 equatable: ^2.x         # Comparação de entidades por valor
 uuid: ^4.x              # IDs únicos
-fpdart: ^1.x            # Either<Falha, T>
+fpdart: ^1.x            # Either<Failure, T>
 go_router: ^14.x        # Roteamento web/mobile
 
 # dev

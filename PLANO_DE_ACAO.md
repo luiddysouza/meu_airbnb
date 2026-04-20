@@ -1,4 +1,4 @@
-# Plano de Ação — meu_airbnb
+﻿# Plano de Ação — meu_airbnb
 
 > Documento de ideação e planejamento completo do projeto **meu_airbnb**.
 > Serve como referência para entender como o projeto foi concebido, quais decisões foram tomadas e por quê.
@@ -106,7 +106,7 @@ Plano detalhado com fases, commits, estrutura, entidades e schema SDUI.
 | **Idioma** | Português | Inglês | Consistência com Task_Manager, preferência do autor |
 | **SDUI engine** | Cubit (`flutter_bloc`) | Bloc, Provider | Previsível, unidirecional, estados discretos claros (loading/sucesso/erro) |
 | **Estado de negócio** | MobX (`mobx` + `flutter_mobx`) | Riverpod, GetX | Reatividade granular, observables + computed, ideal para listas com filtros compostos |
-| **Erros** | `Either<Falha, T>` via `fpdart` | try/catch + exceções | Mais maduro, elimina exceções como fluxo de controle, mostra maturidade no portfólio |
+| **Erros** | `Either<Failure, T>` via `fpdart` | try/catch + exceções | Mais maduro, elimina exceções como fluxo de controle, mostra maturidade no portfólio |
 | **Roteamento** | `go_router` | Navigator 2.0 manual, auto_route | Necessário para web (deep links, browser back), setup mínimo |
 | **DI** | `get_it` | DI manual (como Task_Manager), injectable | Substituição planejada do DI manual, sem code gen extra |
 | **Comparação** | `equatable` | `==` manual | Já validado no Task_Manager, elimina boilerplate |
@@ -144,7 +144,7 @@ JSON mock (assets/) → carrega em memória na inicialização
       → Widgets do Design System
         → Widgets de dados envolvidos em Observer (flutter_mobx)
           → Ações disparam MobX Stores (CRUD + Optimistic State)
-            → Use Cases retornam Either<Falha, T> (fpdart)
+            → Use Cases retornam Either<Failure, T> (fpdart)
               → Repository → DataSource (em memória, simula latência)
 ```
 
@@ -187,7 +187,7 @@ Como funciona:
    → DataSource simula delay com Future.delayed
 4a. Sucesso
    → Descarta snapshot, confirma estado
-4b. Falha
+4b. Failure
    → Restaura snapshot (rollback)
    → Mostra erro via snackbar
 ```
@@ -196,13 +196,13 @@ Como funciona:
 
 ```
 DataSource (lança exceção)
-  → Repository (captura, retorna Left(Falha))
+  → Repository (captura, retorna Left(Failure))
     → UseCase (propaga Either)
       → MobX Store (fold: Left → rollback + erro, Right → confirma)
 ```
 
-- Use cases retornam `Future<Either<Falha, T>>` em vez de lançar exceções
-- Hierarquia: `Falha` (abstrata, Equatable) → `FalhaCache`, `FalhaServidor` (futuro)
+- Use cases retornam `Future<Either<Failure, T>>` em vez de lançar exceções
+- Hierarquia: `Failure` (abstrata, Equatable) → `CacheFailure`, `ServerFailure` (futuro)
 
 ### Responsividade
 
@@ -218,7 +218,7 @@ DataSource (lança exceção)
 
 ## Entidades
 
-### HospedagemEntidade
+### HospedagemEntity
 
 | Campo | Tipo | Descrição |
 |---|---|---|
@@ -235,7 +235,7 @@ DataSource (lança exceção)
 | `notas` | `String?` | Observações |
 | `criadoEm` | `DateTime` | Data de criação |
 
-### ImovelEntidade
+### ImovelEntity
 
 | Campo | Tipo | Descrição |
 |---|---|---|
@@ -371,7 +371,7 @@ meu_airbnb/
 │   ├── main.dart
 │   ├── core/
 │   │   ├── erros/
-│   │   │   └── falhas.dart            # Falha abstrata + FalhaCache
+│   │   │   └── failures.dart            # Failure abstrata + CacheFailure
 │   │   ├── usecases/
 │   │   │   └── usecase.dart           # UseCase<Output, Params> → Either
 │   │   ├── di/
@@ -379,41 +379,41 @@ meu_airbnb/
 │   │   ├── roteamento/
 │   │   │   └── rotas.dart             # go_router config
 │   │   └── sdui/
-│   │       ├── modelos/
-│   │       │   ├── no_sdui.dart       # Nó da árvore (tipo, props, filhos, ações)
-│   │       │   └── acao_sdui.dart     # Ação (tipo, payload)
+│   │       ├── models/
+│   │       │   ├── sdui_node.dart       # Nó da árvore (tipo, props, filhos, ações)
+│   │       │   └── sdui_action.dart     # Ação (tipo, payload)
 │   │       ├── parser/
-│   │       │   └── sdui_parser.dart   # JSON → List<NoSdui>
-│   │       ├── renderizador/
-│   │       │   └── sdui_renderer.dart # NoSdui → Widget (recursivo + Observer)
-│   │       ├── fabrica/
+│   │       │   └── sdui_parser.dart   # JSON → List<SduiNode>
+│   │       ├── renderer/
+│   │       │   └── sdui_renderer.dart # SduiNode → Widget (recursivo + Observer)
+│   │       ├── factory/
 │   │       │   └── widget_factory.dart # Registry tipo→builder (injeta stores)
 │   │       └── cubit/
 │   │           ├── sdui_cubit.dart
-│   │           └── sdui_estado.dart
+│   │           └── sdui_state.dart
 │   │
 │   └── features/
 │       └── hospedagens/
 │           ├── data/
 │           │   ├── datasources/
 │           │   │   └── hospedagem_local_datasource.dart
-│           │   ├── modelos/
-│           │   │   └── hospedagem_modelo.dart
-│           │   └── repositorios/
-│           │       └── hospedagem_repositorio_impl.dart
-│           ├── dominio/
-│           │   ├── entidades/
-│           │   │   ├── hospedagem_entidade.dart
-│           │   │   └── imovel_entidade.dart
-│           │   ├── repositorios/
-│           │   │   └── hospedagem_repositorio.dart
+│           │   ├── models/
+│           │   │   └── hospedagem_model.dart
+│           │   └── repositories/
+│           │       └── hospedagem_repository_impl.dart
+│           ├── domain/
+│           │   ├── entities/
+│           │   │   ├── hospedagem_entity.dart
+│           │   │   └── imovel_entity.dart
+│           │   ├── repositories/
+│           │   │   └── hospedagem_repository.dart
 │           │   └── usecases/
 │           │       ├── obter_hospedagens.dart
 │           │       ├── adicionar_hospedagem.dart
 │           │       ├── atualizar_hospedagem.dart
 │           │       ├── deletar_hospedagem.dart
 │           │       └── obter_imoveis.dart
-│           └── apresentacao/
+│           └── presentation/
 │               ├── stores/
 │               │   ├── hospedagem_store.dart
 │               │   └── filtro_store.dart
@@ -436,15 +436,15 @@ meu_airbnb/
 │   └── features/
 │       └── hospedagens/
 │           ├── data/
-│           │   └── repositorios/
+│           │   └── repositories/
 │           │       └── hospedagem_repositorio_impl_test.dart
-│           ├── dominio/
+│           ├── domain/
 │           │   └── usecases/
 │           │       ├── obter_hospedagens_test.dart
 │           │       ├── adicionar_hospedagem_test.dart
 │           │       ├── atualizar_hospedagem_test.dart
 │           │       └── deletar_hospedagem_test.dart
-│           └── apresentacao/
+│           └── presentation/
 │               └── stores/
 │                   ├── hospedagem_store_test.dart
 │                   └── filtro_store_test.dart
@@ -475,7 +475,7 @@ meu_airbnb/
 | `get_it` | Injeção de dependências |
 | `equatable` | Comparação de entidades por valor |
 | `uuid` | Geração de IDs únicos |
-| `fpdart` | `Either<Falha, T>` — tratamento funcional de erros |
+| `fpdart` | `Either<Failure, T>` — tratamento funcional de erros |
 | `go_router` | Roteamento (necessário para web) |
 | `json_annotation` | Anotações para serialização JSON |
 | `cupertino_icons` | Ícones |
@@ -537,21 +537,21 @@ meu_airbnb/
 ### Fase 2 — SDUI Engine (commits 5–7)
 
 **Commit 5: Modelos SDUI**
-- `NoSdui`: tipo (`String`), propriedades (`Map<String, dynamic>`), filhos (`List<NoSdui>`), ação (`AcaoSdui?`)
-- `AcaoSdui`: tipo (`String`), payload (`Map<String, dynamic>`)
-- `SduiParser`: `String` JSON → `List<NoSdui>` (com validação)
+- `SduiNode`: tipo (`String`), propriedades (`Map<String, dynamic>`), filhos (`List<SduiNode>`), ação (`SduiAction?`)
+- `SduiAction`: tipo (`String`), payload (`Map<String, dynamic>`)
+- `SduiParser`: `String` JSON → `List<SduiNode>` (com validação)
 
 **Commit 6: Widget Factory + Renderer**
 - `WidgetFactory`: registry `Map<String, WidgetBuilder>` com método `registrar(tipo, builder)`
 - Builders dos 7 tipos SDUI registrados (tabela na seção Schema)
 - Injeta MobX stores via `get_it` nos builders que precisam de dados reativos
-- `SduiRenderer`: recebe `List<NoSdui>`, percorre recursivamente, usa `WidgetFactory` para montar widgets
+- `SduiRenderer`: recebe `List<SduiNode>`, percorre recursivamente, usa `WidgetFactory` para montar widgets
 
 **Commit 7: SduiCubit**
-- Estados: `SduiInicial`, `SduiCarregando`, `SduiSucesso(arvore)`, `SduiErro(mensagem)`
+- Estados: `SduiInitial`, `SduiLoading`, `SduiSuccess(arvore)`, `SduiError(mensagem)`
 - Carrega JSON de `assets/mock/tela_hospedagens.json`
 - Parseia via `SduiParser`
-- Tela consome via `BlocBuilder<SduiCubit, SduiEstado>`
+- Tela consome via `BlocBuilder<SduiCubit, SduiState>`
 
 ---
 
@@ -560,20 +560,20 @@ meu_airbnb/
 > Paralela à Fase 6 (mock JSON)
 
 **Commit 8: Entidades + Contratos**
-- `HospedagemEntidade` (Equatable, `copyWith`)
-- `ImovelEntidade` (Equatable)
+- `HospedagemEntity` (Equatable, `copyWith`)
+- `ImovelEntity` (Equatable)
 - Enums: `StatusHospedagem`, `Plataforma`
-- `HospedagemRepositorio` (abstrato): métodos retornam `Future<Either<Falha, T>>`
+- `HospedagemRepository` (abstrato): métodos retornam `Future<Either<Failure, T>>`
 - Use cases: `ObterHospedagens`, `AdicionarHospedagem`, `AtualizarHospedagem`, `DeletarHospedagem`, `ObterImoveis`
 - Contrato `UseCase<Output, Params>` adaptado para retornar `Either`
 
 **Commit 9: Camada Data**
-- `HospedagemModelo`: `fromJson`, `toJson`, `fromEntity`, `toEntity` (com `json_serializable`)
+- `HospedagemModel`: `fromJson`, `toJson`, `fromEntity`, `toEntity` (com `json_serializable`)
 - `HospedagemLocalDataSource`:
   - `init()`: carrega `assets/mock/hospedagens.json` e `imoveis.json` para listas em memória
   - Cada operação CRUD simula latência com `Future.delayed(Duration(milliseconds: 300-800))`
   - Assets são read-only; todas as mutações acontecem na cópia em memória
-- `HospedagemRepositorioImpl`: converte exceções em `Left(FalhaCache)`, sucessos em `Right(valor)`
+- `HospedagemRepositoryImpl`: converte exceções em `Left(CacheFailure)`, sucessos em `Right(valor)`
 
 **Commit 10: DI + Roteamento**
 - `get_it` setup em `injecao.dart`: registra datasources, repositórios, use cases, stores MobX, SduiCubit
@@ -586,7 +586,7 @@ meu_airbnb/
 
 **Commit 11: MobX Stores**
 - `HospedagemStore`:
-  - `@observable ObservableList<HospedagemEntidade> hospedagens`
+  - `@observable ObservableList<HospedagemEntity> hospedagens`
   - `@observable bool carregando`
   - `@observable String? erro`
   - `@action carregarHospedagens()` — chama use case, faz `fold()`
@@ -596,8 +596,8 @@ meu_airbnb/
 - `FiltroStore`:
   - `@observable DateTimeRange? periodoSelecionado`
   - `@observable String? imovelSelecionadoId`
-  - `@observable ObservableList<HospedagemEntidade> todasHospedagens` (referência do HospedagemStore)
-  - `@computed List<HospedagemEntidade> hospedagensFiltradas` — filtra por período + imóvel
+  - `@observable ObservableList<HospedagemEntity> todasHospedagens` (referência do HospedagemStore)
+  - `@computed List<HospedagemEntity> hospedagensFiltradas` — filtra por período + imóvel
   - `@action selecionarPeriodo(DateTimeRange)`
   - `@action selecionarImovel(String? id)`
 
@@ -624,7 +624,7 @@ meu_airbnb/
   - Modo criar vs editar (detecta por `hospedagem != null`)
 - Confirmação de exclusão (dialog)
 - Feedback visual: snackbar do Design System (sucesso/erro)
-- Optimistic updates visíveis: ação reflete imediatamente, rollback visível em caso de falha simulada
+- Optimistic updates visíveis: ação reflete imediatamente, rollback visível em caso de Failure simulada
 
 ---
 
@@ -636,12 +636,12 @@ meu_airbnb/
 - `widget_factory_test.dart`: tipo registrado retorna widget, tipo não registrado retorna fallback
 
 **Commit 16: Testes unitários — Feature**
-- Use cases: mock do repositório com `@GenerateMocks`, verificar que retorna `Right` em sucesso e `Left(Falha)` em erro
+- Use cases: mock do repositório com `@GenerateMocks`, verificar que retorna `Right` em sucesso e `Left(Failure)` em erro
 - Repository impl: mock do datasource, verificar conversão exceção → `Left`, sucesso → `Right`
 - MobX stores: usar `reaction()` para capturar mudanças de observables, testar:
   - `carregarHospedagens` popula lista
   - Optimistic: adicionar reflete antes de confirmar
-  - Rollback: simular falha restaura estado anterior
+  - Rollback: simular Failure restaura estado anterior
   - Filtros: `computed` recalcula corretamente
 
 **Commit 17: Testes de widget**
@@ -713,7 +713,7 @@ Durante a fase de revisão, 8 problemas foram identificados e corrigidos no plan
 | 1 | **DataSource read-only** — O plano original lia/escrevia em `assets/mock/`, mas assets Flutter são read-only em runtime | Datasource carrega JSON de assets apenas na inicialização, mantém cópia mutável em memória para CRUD, simula latência com `Future.delayed` |
 | 2 | **Reatividade SDUI ↔ MobX indefinida** — Não estava claro como widgets SDUI consumiriam dados reativos do MobX | Documentado: WidgetFactory injeta stores via `get_it`, widgets de dados envolvidos em `Observer`, widgets de layout vêm puramente do SDUI |
 | 3 | **Sem roteamento web** — Web precisa de roteamento para deep links e browser back, mesmo com tela única | Adicionado `go_router` desde o início com rota única expandível |
-| 4 | **try/catch para erros** — Usar exceções como fluxo de controle é anti-pattern, especialmente em portfólio | Adicionado `fpdart` com `Either<Falha, T>` em use cases e repository, MobX stores fazem `fold()` |
+| 4 | **try/catch para erros** — Usar exceções como fluxo de controle é anti-pattern, especialmente em portfólio | Adicionado `fpdart` com `Either<Failure, T>` em use cases e repository, MobX stores fazem `fold()` |
 | 5 | **Commit 3 muito grande** — Todos os componentes do Design System em um único commit | Dividido em 3a (inputs), 3b (exibição), 3c (layout) |
 | 6 | **Responsive strategy vaga** — "sidebar + content" sem detalhes de implementação | Definido: `LayoutBuilder` nativo, breakpoints nos tokens do Design System (600/900/1200), sem pacotes extras |
 | 7 | **Testes MobX sem padrão** — Testar stores MobX requer abordagem específica não documentada | Documentado: usar `reaction()` do MobX para capturar mudanças de observables em testes |
@@ -732,7 +732,7 @@ Durante a fase de revisão, 8 problemas foram identificados e corrigidos no plan
 | 5 | Widgetbook funciona | `cd widgetbook && flutter run` — todos os componentes visíveis |
 | 6 | CRUD completo | Criar, editar, deletar hospedagem com feedback visual |
 | 7 | Filtros funcionam | Filtrar por data range e por imóvel simultaneamente |
-| 8 | Optimistic state | Ação reflete imediatamente; simular falha causa rollback + snackbar de erro |
+| 8 | Optimistic state | Ação reflete imediatamente; simular Failure causa rollback + snackbar de erro |
 | 9 | SDUI funciona | Alterar JSON em `assets/mock/tela_hospedagens.json` muda a UI sem recompilar lógica |
 | 10 | CI passa | GitHub Actions: analyze + test + build web + build apk |
 | 11 | Roteamento web | Deep link no browser carrega tela correta, botão back funciona |

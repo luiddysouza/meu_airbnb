@@ -1,6 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:meu_airbnb/core/sdui/modelos/acao_sdui.dart';
-import 'package:meu_airbnb/core/sdui/modelos/no_sdui.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:meu_airbnb/core/sdui/models/sdui_action.dart';
+import 'package:meu_airbnb/core/sdui/models/sdui_node.dart';
 import 'package:meu_airbnb/core/sdui/parser/sdui_parser.dart';
 
 void main() {
@@ -74,7 +74,7 @@ void main() {
       final resultado = SduiParser.parsear(jsonValido);
 
       // Assert
-      expect(resultado[0].acao, isA<AcaoSdui>());
+      expect(resultado[0].acao, isA<SduiAction>());
       expect(resultado[0].acao!.tipo, 'filtrar_por_data');
       expect(resultado[1].acao!.tipo, 'filtrar_por_imovel');
       expect(resultado[2].acao, isNull);
@@ -160,13 +160,13 @@ void main() {
       );
     });
 
-    test('NoSdui com mesmos valores são iguais (Equatable)', () {
+    test('SduiNode com mesmos valores são iguais (Equatable)', () {
       // Arrange
-      const no1 = NoSdui(
+      const no1 = SduiNode(
         tipo: 'botao_primario',
         propriedades: {'rotulo': 'OK'},
       );
-      const no2 = NoSdui(
+      const no2 = SduiNode(
         tipo: 'botao_primario',
         propriedades: {'rotulo': 'OK'},
       );
@@ -175,10 +175,10 @@ void main() {
       expect(no1, equals(no2));
     });
 
-    test('AcaoSdui com mesmos valores são iguais (Equatable)', () {
+    test('SduiAction com mesmos valores são iguais (Equatable)', () {
       // Arrange
-      const acao1 = AcaoSdui(tipo: 'navegar', payload: {'rota': '/home'});
-      const acao2 = AcaoSdui(tipo: 'navegar', payload: {'rota': '/home'});
+      const acao1 = SduiAction(tipo: 'navegar', payload: {'rota': '/home'});
+      const acao2 = SduiAction(tipo: 'navegar', payload: {'rota': '/home'});
 
       // Assert
       expect(acao1, equals(acao2));

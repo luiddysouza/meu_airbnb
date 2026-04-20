@@ -1,68 +1,77 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:meu_airbnb/core/erros/falhas.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:meu_airbnb/core/erros/failures.dart';
 
 void main() {
-  group('FalhaCache', () {
+  group('CacheFailure', () {
     test('duas instâncias com mesma mensagem são iguais (Equatable)', () {
       // Arrange
-      const falha1 = FalhaCache('erro de cache');
-      const falha2 = FalhaCache('erro de cache');
+      const f1 = CacheFailure('erro de cache');
+      const f2 = CacheFailure('erro de cache');
 
       // Act & Assert
-      expect(falha1, equals(falha2));
+      expect(f1, equals(f2));
     });
 
     test('instâncias com mensagens diferentes não são iguais', () {
       // Arrange
-      const falha1 = FalhaCache('erro A');
-      const falha2 = FalhaCache('erro B');
+      const f1 = CacheFailure('erro A');
+      const f2 = CacheFailure('erro B');
 
       // Act & Assert
-      expect(falha1, isNot(equals(falha2)));
+      expect(f1, isNot(equals(f2)));
     });
 
     test('expõe a mensagem corretamente', () {
       // Arrange
-      const falha = FalhaCache('falha ao ler dados locais');
+      const failure = CacheFailure('Failure ao ler dados locais');
 
       // Assert
-      expect(falha.mensagem, 'falha ao ler dados locais');
+      expect(failure.mensagem, 'Failure ao ler dados locais');
     });
   });
 
-  group('FalhaServidor', () {
+  group('ServerFailure', () {
     test('duas instâncias com mesma mensagem são iguais (Equatable)', () {
       // Arrange
-      const falha1 = FalhaServidor('erro de servidor');
-      const falha2 = FalhaServidor('erro de servidor');
+      const f1 = ServerFailure('erro de servidor');
+      const f2 = ServerFailure('erro de servidor');
 
       // Act & Assert
-      expect(falha1, equals(falha2));
+      expect(f1, equals(f2));
     });
 
-    test('FalhaCache e FalhaServidor com mesma mensagem não são iguais', () {
+    test('CacheFailure e ServerFailure com mesma mensagem não são iguais', () {
       // Arrange
-      const falhaCache = FalhaCache('mensagem');
-      const falhaServidor = FalhaServidor('mensagem');
+      const cache = CacheFailure('mensagem');
+      const server = ServerFailure('mensagem');
 
       // Act & Assert
-      expect(falhaCache, isNot(equals(falhaServidor)));
+      expect(cache, isNot(equals(server)));
     });
 
-    test('FalhaCache é subclasse de Falha', () {
+    test('CacheFailure é subclasse de Failure', () {
       // Arrange
-      const falha = FalhaCache('x');
+      const failure = CacheFailure('x');
 
       // Assert
-      expect(falha, isA<Falha>());
+      expect(failure, isA<Failure>());
     });
 
-    test('FalhaServidor é subclasse de Falha', () {
+    test('ServerFailure é subclasse de Failure', () {
       // Arrange
-      const falha = FalhaServidor('x');
+      const failure = ServerFailure('x');
 
       // Assert
-      expect(falha, isA<Falha>());
+      expect(failure, isA<Failure>());
+    });
+
+    test('mensagens diferentes em ServerFailure não são iguais', () {
+      // Arrange
+      const f1 = ServerFailure('erro X');
+      const f2 = ServerFailure('erro Y');
+
+      // Assert
+      expect(f1, isNot(equals(f2)));
     });
   });
 }

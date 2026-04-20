@@ -1,9 +1,9 @@
-import 'package:design_system/design_system.dart';
+﻿import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meu_airbnb/core/sdui/fabrica/widget_factory.dart';
-import 'package:meu_airbnb/core/sdui/modelos/no_sdui.dart';
-import 'package:meu_airbnb/core/sdui/renderizador/sdui_renderer.dart';
+import 'package:meu_airbnb/core/sdui/factory/widget_factory.dart';
+import 'package:meu_airbnb/core/sdui/models/sdui_node.dart';
+import 'package:meu_airbnb/core/sdui/renderer/sdui_renderer.dart';
 
 Widget _app(Widget child) => MaterialApp(
   theme: DsTemaApp.tema,
@@ -51,7 +51,7 @@ void main() {
           Builder(
             builder: (ctx) => fabrica.construir(
               ctx,
-              const NoSdui(tipo: 'rotulo', propriedades: {'valor': 'Olá'}),
+              const SduiNode(tipo: 'rotulo', propriedades: {'valor': 'Olá'}),
               (c, n) => fabrica.construir(c, n, (_, _) => const SizedBox()),
             ),
           ),
@@ -71,7 +71,7 @@ void main() {
           Builder(
             builder: (ctx) => fabrica.construir(
               ctx,
-              const NoSdui(tipo: 'nao_existe'),
+              const SduiNode(tipo: 'nao_existe'),
               (c, n) => fabrica.construir(c, n, (_, _) => const SizedBox()),
             ),
           ),
@@ -108,7 +108,7 @@ void main() {
           Builder(
             builder: (ctx) => fabricaPadrao.construir(
               ctx,
-              const NoSdui(
+              const SduiNode(
                 tipo: 'estado_vazio',
                 propriedades: {'mensagem': 'Lista vazia'},
               ),
@@ -134,7 +134,7 @@ void main() {
           Builder(
             builder: (ctx) => fabricaPadrao.construir(
               ctx,
-              const NoSdui(tipo: 'carregando'),
+              const SduiNode(tipo: 'carregando'),
               (c, n) =>
                   fabricaPadrao.construir(c, n, (_, _) => const SizedBox()),
             ),
@@ -162,8 +162,8 @@ void main() {
     testWidgets('renderiza lista de nós corretamente', (tester) async {
       // Arrange
       final nos = [
-        const NoSdui(tipo: 'texto', propriedades: {'valor': 'Primeiro'}),
-        const NoSdui(tipo: 'texto', propriedades: {'valor': 'Segundo'}),
+        const SduiNode(tipo: 'texto', propriedades: {'valor': 'Primeiro'}),
+        const SduiNode(tipo: 'texto', propriedades: {'valor': 'Segundo'}),
       ];
 
       // Act
@@ -176,7 +176,7 @@ void main() {
 
     testWidgets('ignora tipos não registrados sem lançar erro', (tester) async {
       // Arrange
-      final nos = [const NoSdui(tipo: 'nao_existe')];
+      final nos = [const SduiNode(tipo: 'nao_existe')];
 
       // Act
       await tester.pumpWidget(_app(SduiRenderer(nos: nos, fabrica: fabrica)));
@@ -194,11 +194,11 @@ void main() {
       });
 
       final nos = [
-        const NoSdui(
+        const SduiNode(
           tipo: 'coluna',
           filhos: [
-            NoSdui(tipo: 'texto', propriedades: {'valor': 'filho 1'}),
-            NoSdui(tipo: 'texto', propriedades: {'valor': 'filho 2'}),
+            SduiNode(tipo: 'texto', propriedades: {'valor': 'filho 1'}),
+            SduiNode(tipo: 'texto', propriedades: {'valor': 'filho 2'}),
           ],
         ),
       ];
@@ -227,15 +227,15 @@ void main() {
       // Arrange
       final fabricaPadrao = WidgetFactory.padrao();
       const nos = [
-        NoSdui(
+        SduiNode(
           tipo: 'seletor_data_range',
           propriedades: {
             'rotulo_inicio': 'Check-in',
             'rotulo_fim': 'Check-out',
           },
         ),
-        NoSdui(tipo: 'dropdown', propriedades: {'rotulo': 'Imóvel'}),
-        NoSdui(
+        SduiNode(tipo: 'dropdown', propriedades: {'rotulo': 'Imóvel'}),
+        SduiNode(
           tipo: 'lista',
           propriedades: {'vazio_mensagem': 'Nenhuma hospedagem encontrada'},
         ),
