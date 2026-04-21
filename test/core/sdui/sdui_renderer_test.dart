@@ -1,9 +1,17 @@
 ﻿import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:get_it/get_it.dart';
+import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/core/sdui/factory/widget_factory.dart';
 import 'package:meu_airbnb/core/sdui/models/sdui_node.dart';
 import 'package:meu_airbnb/core/sdui/renderer/sdui_renderer.dart';
+import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
+import 'package:meu_airbnb/features/hospedagens/presentation/stores/filtro_store.dart';
+import 'package:mockito/mockito.dart';
+
+import '../../features/hospedagens/presentation/stores/usecases_mock.mocks.dart';
 
 Widget _app(Widget child) => MaterialApp(
   theme: DsTemaApp.tema,
@@ -224,7 +232,15 @@ void main() {
     testWidgets('usa WidgetFactory.padrao com JSON da tela de hospedagens', (
       tester,
     ) async {
-      // Arrange
+      // Arrange — configura DI com FiltroStore para os builders reativos
+      final mockObterImoveis = MockObterImoveis();
+      provideDummy<Either<Failure, List<ImovelEntity>>>(
+        Right<Failure, List<ImovelEntity>>([]),
+      );
+      final filtroStore = FiltroStore(mockObterImoveis);
+      GetIt.instance.registerSingleton<FiltroStore>(filtroStore);
+      addTearDown(GetIt.instance.reset);
+
       final fabricaPadrao = WidgetFactory.padrao();
       const nos = [
         SduiNode(

@@ -1,6 +1,9 @@
 ﻿import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
+import '../../../features/hospedagens/presentation/stores/filtro_store.dart';
+import '../../di/injecao.dart';
 import '../models/sdui_node.dart';
 
 /// Assinatura de um builder de widget SDUI.
@@ -59,13 +62,16 @@ class WidgetFactory {
   /// Cria uma [WidgetFactory] pré-configurada com os builders dos 7 tipos
   /// SDUI registrados no schema do projeto.
   ///
-  /// Os builders de widgets reativos (dropdown, lista) serão conectados
-  /// aos MobX stores na integração SDUI ↔ MobX (Commit 12).
+  /// Os builders reativos (seletor_data_range, dropdown, lista) são conectados
+  /// aos MobX stores via [sl] (get_it). O store é resolvido de forma lazy
+  /// durante a construção do widget, após o DI estar inicializado.
   factory WidgetFactory.padrao() {
     final fabrica = WidgetFactory();
-    fabrica.registrar('seletor_data_range', _buildSeletorDataRange);
-    fabrica.registrar('dropdown', _buildDropdown);
-    fabrica.registrar('lista', _buildLista);
+    // Builders reativos — instance methods que acessam FiltroStore via DI
+    fabrica.registrar('seletor_data_range', fabrica._buildSeletorDataRange);
+    fabrica.registrar('dropdown', fabrica._buildDropdown);
+    fabrica.registrar('lista', fabrica._buildLista);
+    // Builders estáticos — sem dependência de stores
     fabrica.registrar('card_hospedagem', _buildCardHospedagem);
     fabrica.registrar('botao_primario', _buildBotaoPrimario);
     fabrica.registrar('estado_vazio', _buildEstadoVazio);
@@ -74,45 +80,77 @@ class WidgetFactory {
   }
 
   // ---------------------------------------------------------------------------
-  // Builders estáticos — estrutura definida pelo SDUI, dados via propriedades
+  // Builders reativos — conectados ao FiltroStore via get_it
   // ---------------------------------------------------------------------------
 
-  static Widget _buildSeletorDataRange(
+  Widget _buildSeletorDataRange(
     BuildContext context,
     SduiNode no,
     Widget Function(BuildContext, SduiNode) renderizarFilho,
   ) {
+    final filtroStore = sl<FiltroStore>();
     final props = no.propriedades;
-    return DsDateRangePicker(
-      rotuloInicio: props['rotulo_inicio'] as String? ?? 'Check-in',
-      rotuloFim: props['rotulo_fim'] as String? ?? 'Check-out',
-      aoSelecionar: (_) {},
+    return Observer(
+      builder: (_) => DsDateRangePicker(
+        rotuloInicio: props['rotulo_inicio'] as String? ?? 'Check-in',
+        rotuloFim: props['rotulo_fim'] as String? ?? 'Check-out',
+        periodoSelecionado: filtroStore.periodoSelecionado,
+        aoSelecionar: (range) => filtroStore.selecionarPeriodo(range),
+      ),
     );
   }
 
-  static Widget _buildDropdown(
+  Widget _buildDropdown(
     BuildContext context,
     SduiNode no,
     Widget Function(BuildContext, SduiNode) renderizarFilho,
   ) {
+    final filtroStore = sl<FiltroStore>();
     final props = no.propriedades;
-    return DsDropdown(
-      rotulo: props['rotulo'] as String? ?? '',
-      opcoes: const [],
-      aoSelecionar: (_) {},
+    return Observer(
+      builder: (_) => DsDropdown(
+        rotulo: props['rotulo'] as String? ?? '',
+        opcoes: filtroStore.imoveis
+            .map((i) => DsOpcaoDropdown(valor: i.id, rotulo: i.nome))
+            .toList(),
+        valorSelecionado: filtroStore.imovelSelecionadoId,
+        aoSelecionar: filtroStore.selecionarImovel,
+      ),
     );
   }
 
-  static Widget _buildLista(
+  Widget _buildLista(
     BuildContext context,
     SduiNode no,
     Widget Function(BuildContext, SduiNode) renderizarFilho,
   ) {
+    final filtroStore = sl<FiltroStore>();
     final props = no.propriedades;
-    return DsLista(
-      itens: const [],
-      mensagemVazia:
-          props['vazio_mensagem'] as String? ?? 'Nenhuma hospedagem encontrada',
+    return Observer(
+      builder: (_) {
+        final hospedagens = filtroStore.hospedagensFiltradas;
+        return DsLista(
+          mensagemVazia:
+              props['vazio_mensagem'] as String? ??
+              'Nenhuma hospedagem encontrada',
+          itens: hospedagens.map((h) {
+            final imovelMatch = filtroStore.imoveis.where(
+              (i) => i.id == h.imovelId,
+            );
+            final nomeImovel = imovelMatch.isEmpty
+                ? null
+                : imovelMatch.first.nome;
+            return DsCardHospedagem(
+              nomeHospede: h.nomeHospede,
+              checkIn: h.checkIn,
+              checkOut: h.checkOut,
+              valorTotal: h.valorTotal,
+              status: _statusDe(h.status.name),
+              nomeImovel: nomeImovel,
+            );
+          }).toList(),
+        );
+      },
     );
   }
 
