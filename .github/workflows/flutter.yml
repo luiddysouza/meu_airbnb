@@ -1,0 +1,66 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    name: Analyze, Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Flutter SDK ─────────────────────────────────────────────────────────
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # ── Dependências — app principal ────────────────────────────────────────
+      - name: flutter pub get
+        run: flutter pub get
+
+      # ── Dependências — design_system ────────────────────────────────────────
+      - name: flutter pub get (design_system)
+        working-directory: packages/design_system
+        run: flutter pub get
+
+      # ── Dependências — widgetbook ───────────────────────────────────────────
+      - name: flutter pub get (widgetbook)
+        working-directory: widgetbook
+        run: flutter pub get
+
+      # ── Code generation ─────────────────────────────────────────────────────
+      - name: build_runner — gerar código (MobX + JSON + mocks)
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      # ── Análise estática ────────────────────────────────────────────────────
+      - name: flutter analyze (app)
+        run: flutter analyze --fatal-infos
+
+      - name: flutter analyze (design_system)
+        working-directory: packages/design_system
+        run: flutter analyze --fatal-infos
+
+      # ── Testes ──────────────────────────────────────────────────────────────
+      - name: flutter test (design_system)
+        working-directory: packages/design_system
+        run: flutter test
+
+      - name: flutter test (app) com cobertura
+        run: flutter test --coverage
+
+      # ── Build web ───────────────────────────────────────────────────────────
+      - name: flutter build web
+        run: flutter build web --release
+
+      # ── Build APK (debug) ───────────────────────────────────────────────────
+      - name: flutter build apk (debug)
+        run: flutter build apk --debug
