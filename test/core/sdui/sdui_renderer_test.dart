@@ -7,8 +7,11 @@ import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/core/sdui/factory/widget_factory.dart';
 import 'package:meu_airbnb/core/sdui/models/sdui_node.dart';
 import 'package:meu_airbnb/core/sdui/renderer/sdui_renderer.dart';
+import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
+import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/filtro_store.dart';
+import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../features/hospedagens/presentation/stores/usecases_mock.mocks.dart';
@@ -232,13 +235,45 @@ void main() {
     testWidgets('usa WidgetFactory.padrao com JSON da tela de hospedagens', (
       tester,
     ) async {
-      // Arrange — configura DI com FiltroStore para os builders reativos
+      // Arrange — configura DI com FiltroStore e HospedagemStore
       final mockObterImoveis = MockObterImoveis();
+      final mockObterHospedagens = MockObterHospedagens();
+      final mockAdicionar = MockAdicionarHospedagem();
+      final mockAtualizar = MockAtualizarHospedagem();
+      final mockDeletar = MockDeletarHospedagem();
       provideDummy<Either<Failure, List<ImovelEntity>>>(
         Right<Failure, List<ImovelEntity>>([]),
       );
+      provideDummy<Either<Failure, List<HospedagemEntity>>>(
+        Right<Failure, List<HospedagemEntity>>([]),
+      );
+      provideDummy<Either<Failure, HospedagemEntity>>(
+        Right<Failure, HospedagemEntity>(
+          HospedagemEntity(
+            id: '',
+            nomeHospede: '',
+            checkIn: DateTime(2024),
+            checkOut: DateTime(2024),
+            numHospedes: 1,
+            valorTotal: 0,
+            status: StatusHospedagem.pendente,
+            plataforma: Plataforma.airbnb,
+            imovelId: '',
+            criadoEm: DateTime(2024),
+          ),
+        ),
+      );
+      provideDummy<Either<Failure, void>>(const Right<Failure, void>(null));
       final filtroStore = FiltroStore(mockObterImoveis);
-      GetIt.instance.registerSingleton<FiltroStore>(filtroStore);
+      final hospedagemStore = HospedagemStore(
+        mockObterHospedagens,
+        mockAdicionar,
+        mockAtualizar,
+        mockDeletar,
+      );
+      GetIt.instance
+        ..registerSingleton<FiltroStore>(filtroStore)
+        ..registerSingleton<HospedagemStore>(hospedagemStore);
       addTearDown(GetIt.instance.reset);
 
       final fabricaPadrao = WidgetFactory.padrao();

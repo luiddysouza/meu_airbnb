@@ -31,6 +31,7 @@ export 'componentes/listas/ds_list_tile.dart';
 export 'componentes/feedback/ds_estado_vazio.dart';
 export 'componentes/feedback/ds_carregando.dart';
 export 'componentes/feedback/ds_snackbar.dart';
+export 'componentes/feedback/ds_dialog_confirmacao.dart';
 
 // Componentes — Layout
 export 'componentes/layout/ds_scaffold_responsivo.dart';

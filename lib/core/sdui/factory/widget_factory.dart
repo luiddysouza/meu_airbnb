@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 import '../../../features/hospedagens/presentation/stores/filtro_store.dart';
+import '../../../features/hospedagens/presentation/stores/hospedagem_store.dart';
+import '../../../features/hospedagens/presentation/widgets/formulario_hospedagem_dialog.dart';
 import '../../di/injecao.dart';
 import '../models/sdui_node.dart';
 
@@ -125,6 +127,7 @@ class WidgetFactory {
     Widget Function(BuildContext, SduiNode) renderizarFilho,
   ) {
     final filtroStore = sl<FiltroStore>();
+    final hospedagemStore = sl<HospedagemStore>();
     final props = no.propriedades;
     return Observer(
       builder: (_) {
@@ -147,6 +150,47 @@ class WidgetFactory {
               valorTotal: h.valorTotal,
               status: _statusDe(h.status.name),
               nomeImovel: nomeImovel,
+              aoEditar: () async {
+                final salvo = await FormularioHospedagemDialog.mostrar(
+                  context,
+                  hospedagemStore: hospedagemStore,
+                  imoveis: filtroStore.imoveis,
+                  hospedagem: h,
+                );
+                if (!context.mounted) return;
+                if (salvo) {
+                  if (hospedagemStore.erro != null) {
+                    DsSnackbar.erro(context, mensagem: hospedagemStore.erro!);
+                  } else {
+                    DsSnackbar.sucesso(
+                      context,
+                      mensagem: 'Hospedagem atualizada com sucesso!',
+                    );
+                  }
+                }
+              },
+              aoDeletar: () async {
+                final confirmado = await DsDialogConfirmacao.mostrar(
+                  context,
+                  titulo: 'Excluir hospedagem',
+                  mensagem:
+                      'Deseja excluir a hospedagem de ${h.nomeHospede}? '
+                      'Essa ação não pode ser desfeita.',
+                  rotuloConfirmar: 'Excluir',
+                  destrutivo: true,
+                );
+                if (!confirmado) return;
+                await hospedagemStore.deletarHospedagem(h.id);
+                if (!context.mounted) return;
+                if (hospedagemStore.erro != null) {
+                  DsSnackbar.erro(context, mensagem: hospedagemStore.erro!);
+                } else {
+                  DsSnackbar.sucesso(
+                    context,
+                    mensagem: 'Hospedagem removida com sucesso!',
+                  );
+                }
+              },
             );
           }).toList(),
         );

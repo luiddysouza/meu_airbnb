@@ -10,6 +10,7 @@ import '../../../../core/sdui/models/sdui_node.dart';
 import '../../../../core/sdui/renderer/sdui_renderer.dart';
 import '../stores/filtro_store.dart';
 import '../stores/hospedagem_store.dart';
+import '../widgets/formulario_hospedagem_dialog.dart';
 
 /// Página principal de hospedagens.
 ///
@@ -88,6 +89,13 @@ class _HospedagensPaginaState extends State<HospedagensPagina> {
 
     return DsScaffoldResponsivo(
       titulo: 'Hospedagens',
+      botaoAcaoFlutuante: FloatingActionButton(
+        onPressed: _abrirFormularioCriacao,
+        backgroundColor: DsCores.primaria,
+        foregroundColor: DsCores.branco,
+        tooltip: 'Nova hospedagem',
+        child: const Icon(Icons.add),
+      ),
       conteudoSidebar: nosSidebar.isNotEmpty
           ? Padding(
               padding: const EdgeInsets.all(DsEspacamentos.md),
@@ -99,5 +107,26 @@ class _HospedagensPaginaState extends State<HospedagensPagina> {
         child: SduiRenderer(nos: nosMain, fabrica: _fabricaSdui),
       ),
     );
+  }
+
+  Future<void> _abrirFormularioCriacao() async {
+    final hospedagemStore = sl<HospedagemStore>();
+    final filtroStore = sl<FiltroStore>();
+
+    final salvo = await FormularioHospedagemDialog.mostrar(
+      context,
+      hospedagemStore: hospedagemStore,
+      imoveis: filtroStore.imoveis,
+    );
+
+    if (!mounted) return;
+
+    if (salvo) {
+      if (hospedagemStore.erro != null) {
+        DsSnackbar.erro(context, mensagem: hospedagemStore.erro!);
+      } else {
+        DsSnackbar.sucesso(context, mensagem: 'Hospedagem criada com sucesso!');
+      }
+    }
   }
 }

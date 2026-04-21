@@ -213,5 +213,40 @@ final exibicaoFolder = WidgetbookFolder(
         ),
       ],
     ),
+    WidgetbookComponent(
+      name: 'DsDialogConfirmacao',
+      useCases: [
+        WidgetbookUseCase(
+          name: 'Padrão',
+          builder: (context) => Center(
+            child: DsBotaoPrimario(
+              rotulo: 'Abrir confirmação',
+              aoTocar: () => DsDialogConfirmacao.mostrar(
+                context,
+                titulo: 'Confirmar ação',
+                mensagem: 'Tem certeza que deseja continuar?',
+              ),
+            ),
+          ),
+        ),
+        WidgetbookUseCase(
+          name: 'Destrutivo',
+          builder: (context) => Center(
+            child: DsBotaoPrimario(
+              rotulo: 'Excluir hospedagem',
+              aoTocar: () => DsDialogConfirmacao.mostrar(
+                context,
+                titulo: 'Excluir hospedagem',
+                mensagem:
+                    'Deseja excluir a hospedagem de João Silva? '
+                    'Essa ação não pode ser desfeita.',
+                rotuloConfirmar: 'Excluir',
+                destrutivo: true,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
   ],
 );

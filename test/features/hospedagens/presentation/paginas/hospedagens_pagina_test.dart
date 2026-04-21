@@ -238,4 +238,62 @@ void main() {
       );
     });
   });
+
+  // ── FAB ────────────────────────────────────────────────────────────────────
+
+  group('HospedagensPagina — FAB', () {
+    final arvoreFixture = [
+      const SduiNode(
+        tipo: 'seletor_data_range',
+        propriedades: {'rotulo_inicio': 'Check-in', 'rotulo_fim': 'Check-out'},
+      ),
+      const SduiNode(tipo: 'dropdown', propriedades: {'rotulo': 'Imóvel'}),
+      const SduiNode(
+        tipo: 'lista',
+        propriedades: {'vazio_mensagem': 'Nenhuma hospedagem encontrada'},
+      ),
+    ];
+
+    testWidgets('exibe FAB quando estado é SduiSuccess', (tester) async {
+      // Arrange
+      await tester.pumpWidget(_app(const HospedagensPagina()));
+
+      // Act
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+      sduiCubit.emit(SduiSuccess(arvoreFixture));
+      await tester.pump();
+
+      // Assert
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+    });
+
+    testWidgets('FAB abre FormularioHospedagemDialog no modo criação', (
+      tester,
+    ) async {
+      // Arrange
+      await tester.pumpWidget(_app(const HospedagensPagina()));
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+      sduiCubit.emit(SduiSuccess(arvoreFixture));
+      // pumpAndSettle aguarda a animação de entrada do FAB
+      await tester.pumpAndSettle();
+
+      // Act
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      // Assert — dialog de criação está aberto
+      expect(find.text('Nova hospedagem'), findsOneWidget);
+    });
+
+    testWidgets('FAB não aparece no estado SduiLoading', (tester) async {
+      // Arrange
+      await tester.pumpWidget(_app(const HospedagensPagina()));
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+      sduiCubit.emit(const SduiLoading());
+      await tester.pump();
+
+      // Assert
+      expect(find.byType(FloatingActionButton), findsNothing);
+    });
+  });
 }

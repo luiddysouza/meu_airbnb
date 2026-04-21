@@ -9,11 +9,11 @@ import 'package:mockito/mockito.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/core/sdui/factory/widget_factory.dart';
 import 'package:meu_airbnb/core/sdui/models/sdui_node.dart';
-import 'package:meu_airbnb/core/usecases/usecase.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/filtro_store.dart';
+import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
 
 import '../../features/hospedagens/presentation/stores/usecases_mock.mocks.dart';
 
@@ -24,16 +24,55 @@ Widget _app(Widget child) => MaterialApp(
 
 void main() {
   late MockObterImoveis mockObterImoveis;
+  late MockObterHospedagens mockObterHospedagens;
+  late MockAdicionarHospedagem mockAdicionarHospedagem;
+  late MockAtualizarHospedagem mockAtualizarHospedagem;
+  late MockDeletarHospedagem mockDeletarHospedagem;
   late FiltroStore filtroStore;
+  late HospedagemStore hospedagemStore;
 
   setUp(() {
     mockObterImoveis = MockObterImoveis();
+    mockObterHospedagens = MockObterHospedagens();
+    mockAdicionarHospedagem = MockAdicionarHospedagem();
+    mockAtualizarHospedagem = MockAtualizarHospedagem();
+    mockDeletarHospedagem = MockDeletarHospedagem();
+
     provideDummy<Either<Failure, List<ImovelEntity>>>(
       Right<Failure, List<ImovelEntity>>([]),
     );
+    provideDummy<Either<Failure, List<HospedagemEntity>>>(
+      Right<Failure, List<HospedagemEntity>>([]),
+    );
+    provideDummy<Either<Failure, HospedagemEntity>>(
+      Right<Failure, HospedagemEntity>(
+        HospedagemEntity(
+          id: '',
+          nomeHospede: '',
+          checkIn: DateTime(2024),
+          checkOut: DateTime(2024),
+          numHospedes: 1,
+          valorTotal: 0,
+          status: StatusHospedagem.pendente,
+          plataforma: Plataforma.airbnb,
+          imovelId: '',
+          criadoEm: DateTime(2024),
+        ),
+      ),
+    );
+    provideDummy<Either<Failure, void>>(const Right<Failure, void>(null));
 
     filtroStore = FiltroStore(mockObterImoveis);
-    GetIt.instance.registerSingleton<FiltroStore>(filtroStore);
+    hospedagemStore = HospedagemStore(
+      mockObterHospedagens,
+      mockAdicionarHospedagem,
+      mockAtualizarHospedagem,
+      mockDeletarHospedagem,
+    );
+
+    GetIt.instance
+      ..registerSingleton<FiltroStore>(filtroStore)
+      ..registerSingleton<HospedagemStore>(hospedagemStore);
   });
 
   tearDown(() {
@@ -286,6 +325,158 @@ void main() {
 
         // Assert
         expect(find.text('Nenhuma hospedagem encontrada'), findsOneWidget);
+      },
+    );
+  });
+
+  // ── lista — callbacks CRUD ────────────────────────────────────────────────
+
+  group('WidgetFactory.padrao — lista callbacks CRUD', () {
+    const no = SduiNode(
+      tipo: 'lista',
+      propriedades: {'vazio_mensagem': 'Sem hospedagens'},
+    );
+
+    HospedagemEntity criarHospedagem(String id) => HospedagemEntity(
+      id: id,
+      nomeHospede: 'Hóspede $id',
+      checkIn: DateTime(2024, 1, 10),
+      checkOut: DateTime(2024, 1, 15),
+      numHospedes: 2,
+      valorTotal: 500.0,
+      status: StatusHospedagem.confirmada,
+      plataforma: Plataforma.airbnb,
+      imovelId: 'imovel-1',
+      criadoEm: DateTime(2024, 1, 1),
+    );
+
+    testWidgets('cards exibem botão de editar', (tester) async {
+      // Arrange
+      runInAction(() {
+        filtroStore.todasHospedagens.add(criarHospedagem('h1'));
+      });
+
+      // Act
+      await tester.pumpWidget(_app(_construir(no)));
+
+      // Assert — ícone de edição presente
+      expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+    });
+
+    testWidgets('cards exibem botão de deletar', (tester) async {
+      // Arrange
+      runInAction(() {
+        filtroStore.todasHospedagens.add(criarHospedagem('h1'));
+      });
+
+      // Act
+      await tester.pumpWidget(_app(_construir(no)));
+
+      // Assert — ícone de deletar presente
+      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+    });
+
+    testWidgets(
+      'toque em deletar exibe DsDialogConfirmacao com nome do hóspede',
+      (tester) async {
+        // Arrange
+        runInAction(() {
+          filtroStore.todasHospedagens.add(criarHospedagem('h1'));
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: DsTemaApp.tema,
+            home: Scaffold(body: SingleChildScrollView(child: _construir(no))),
+          ),
+        );
+
+        // Act
+        await tester.tap(find.byIcon(Icons.delete_outline));
+        await tester.pumpAndSettle();
+
+        // Assert — dialog de confirmação aparece com nome do hóspede
+        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(find.text('Excluir hospedagem'), findsOneWidget);
+        expect(find.textContaining('Hóspede h1'), findsAtLeastNWidgets(1));
+      },
+    );
+
+    testWidgets('confirmar exclusão chama deletarHospedagem no store', (
+      tester,
+    ) async {
+      // Arrange
+      when(
+        mockDeletarHospedagem(any),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+
+      runInAction(() {
+        filtroStore.todasHospedagens.add(criarHospedagem('h1'));
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DsTemaApp.tema,
+          home: Scaffold(body: SingleChildScrollView(child: _construir(no))),
+        ),
+      );
+
+      // Act — toca deletar, confirma no dialog
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Excluir'));
+      await tester.pumpAndSettle();
+
+      // Assert
+      verify(mockDeletarHospedagem(any)).called(1);
+    });
+
+    testWidgets('cancelar exclusão não chama deletarHospedagem', (
+      tester,
+    ) async {
+      // Arrange
+      runInAction(() {
+        filtroStore.todasHospedagens.add(criarHospedagem('h1'));
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: DsTemaApp.tema,
+          home: Scaffold(body: SingleChildScrollView(child: _construir(no))),
+        ),
+      );
+
+      // Act — toca deletar, cancela no dialog
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      // Assert
+      verifyNever(mockDeletarHospedagem(any));
+    });
+
+    testWidgets(
+      'toque em editar abre FormularioHospedagemDialog em modo edição',
+      (tester) async {
+        // Arrange
+        runInAction(() {
+          filtroStore.todasHospedagens.add(criarHospedagem('h1'));
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: DsTemaApp.tema,
+            home: Scaffold(body: SingleChildScrollView(child: _construir(no))),
+          ),
+        );
+
+        // Act
+        await tester.tap(find.byIcon(Icons.edit_outlined));
+        await tester.pumpAndSettle();
+
+        // Assert — dialog de edição aberto
+        expect(find.text('Editar hospedagem'), findsOneWidget);
       },
     );
   });
