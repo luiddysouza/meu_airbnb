@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 
-import '../../domain/entities/hospedagem_entity.dart';
-import '../../domain/usecases/obter_imoveis.dart';
-import '../../domain/entities/imovel_entity.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../domain/entities/hospedagem_entity.dart';
+import '../../domain/entities/imovel_entity.dart';
+import '../../domain/usecases/obter_imoveis.dart';
 
 part 'filtro_store.g.dart';
 

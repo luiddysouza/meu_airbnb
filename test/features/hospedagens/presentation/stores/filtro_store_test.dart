@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mobx/mobx.dart' hide when;
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/core/usecases/usecase.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/filtro_store.dart';
+import 'package:mobx/mobx.dart' hide when;
+import 'package:mockito/mockito.dart';
+import 'package:mockito/mockito.dart' as mockito;
 
 import 'usecases_mock.mocks.dart';
-
-// Atalho para o when do mockito sem ambiguidade
-import 'package:mockito/mockito.dart' as mockito;
 
 void main() {
   late MockObterImoveis mockObterImoveis;
   late FiltroStore store;
 
-  final imovel1 = const ImovelEntity(id: 'imovel-1', nome: 'Casa A');
-  final imovel2 = const ImovelEntity(id: 'imovel-2', nome: 'Casa B');
+  const imovel1 = ImovelEntity(id: 'imovel-1', nome: 'Casa A');
+  const imovel2 = ImovelEntity(id: 'imovel-2', nome: 'Casa B');
 
   HospedagemEntity criarHospedagem({
     required String id,
@@ -44,7 +42,7 @@ void main() {
     mockObterImoveis = MockObterImoveis();
 
     provideDummy<Either<Failure, List<ImovelEntity>>>(
-      Right<Failure, List<ImovelEntity>>([]),
+      const Right<Failure, List<ImovelEntity>>([]),
     );
 
     store = FiltroStore(mockObterImoveis);
@@ -215,7 +213,7 @@ void main() {
       // Arrange
       mockito
           .when(mockObterImoveis(const NoParams()))
-          .thenAnswer((_) async => Right([imovel1, imovel2]));
+          .thenAnswer((_) async => const Right([imovel1, imovel2]));
 
       // Act
       await store.carregarImoveis();
@@ -230,7 +228,7 @@ void main() {
       mockito
           .when(mockObterImoveis(const NoParams()))
           .thenAnswer(
-            (_) async => Left(const CacheFailure('Falha ao carregar imóveis')),
+            (_) async => const Left(CacheFailure('Falha ao carregar imóveis')),
           );
 
       // Act

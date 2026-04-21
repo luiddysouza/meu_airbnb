@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/core/usecases/usecase.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
+import 'package:mockito/mockito.dart';
 
 import 'usecases_mock.mocks.dart';
 
@@ -40,7 +40,7 @@ void main() {
     mockDeletarHospedagem = MockDeletarHospedagem();
 
     provideDummy<Either<Failure, List<HospedagemEntity>>>(
-      Right<Failure, List<HospedagemEntity>>([]),
+      const Right<Failure, List<HospedagemEntity>>([]),
     );
     provideDummy<Either<Failure, HospedagemEntity>>(
       Right<Failure, HospedagemEntity>(hospedagemFixture),
@@ -80,7 +80,7 @@ void main() {
         // Arrange
         when(
           mockObterHospedagens(const NoParams()),
-        ).thenAnswer((_) async => Left(const CacheFailure('Erro de cache')));
+        ).thenAnswer((_) async => const Left(CacheFailure('Erro de cache')));
 
         // Act
         await store.carregarHospedagens();
@@ -112,7 +112,7 @@ void main() {
       // Arrange
       when(
         mockAdicionarHospedagem(any),
-      ).thenAnswer((_) async => Left(const CacheFailure('Falha ao salvar')));
+      ).thenAnswer((_) async => const Left(CacheFailure('Falha ao salvar')));
 
       // Act
       await store.adicionarHospedagem(hospedagemFixture);
@@ -153,7 +153,7 @@ void main() {
       // Arrange
       when(
         mockAtualizarHospedagem(any),
-      ).thenAnswer((_) async => Left(const CacheFailure('Falha ao atualizar')));
+      ).thenAnswer((_) async => const Left(CacheFailure('Falha ao atualizar')));
 
       // Act
       await store.atualizarHospedagem(hospedagemAtualizada);
@@ -190,7 +190,7 @@ void main() {
       // Arrange
       when(
         mockDeletarHospedagem(any),
-      ).thenAnswer((_) async => Left(const CacheFailure('Falha ao deletar')));
+      ).thenAnswer((_) async => const Left(CacheFailure('Falha ao deletar')));
 
       // Act
       await store.deletarHospedagem(hospedagemFixture.id);
@@ -206,7 +206,7 @@ void main() {
       // Arrange — seta erro via carregamento falho
       when(
         mockObterHospedagens(const NoParams()),
-      ).thenAnswer((_) async => Left(const CacheFailure('Erro')));
+      ).thenAnswer((_) async => const Left(CacheFailure('Erro')));
       await store.carregarHospedagens();
       expect(store.erro, isNotNull);
 

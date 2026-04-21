@@ -2,13 +2,13 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/widgets/formulario_hospedagem_dialog.dart';
+import 'package:mockito/mockito.dart';
 
 import '../stores/usecases_mock.mocks.dart';
 
@@ -61,7 +61,7 @@ void main() {
     mockDeletar = MockDeletarHospedagem();
 
     provideDummy<Either<Failure, List<HospedagemEntity>>>(
-      Right<Failure, List<HospedagemEntity>>([]),
+      const Right<Failure, List<HospedagemEntity>>([]),
     );
     provideDummy<Either<Failure, HospedagemEntity>>(
       Right<Failure, HospedagemEntity>(_hospedagemFixture),
@@ -445,8 +445,9 @@ void main() {
       (tester) async {
         // Arrange
         when(mockAtualizar(any)).thenAnswer(
-          (_) async =>
-              Left<Failure, HospedagemEntity>(CacheFailure('Erro ao salvar')),
+          (_) async => const Left<Failure, HospedagemEntity>(
+            CacheFailure('Erro ao salvar'),
+          ),
         );
 
         await tester.pumpWidget(

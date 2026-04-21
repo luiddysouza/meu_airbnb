@@ -1,11 +1,11 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/features/hospedagens/data/repositories/hospedagem_repository_impl.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
+import 'package:mockito/mockito.dart';
 
 import 'datasource_mock.mocks.dart';
 
@@ -62,7 +62,7 @@ void main() {
         // Assert
         expect(resultado.isLeft(), isTrue);
         resultado.fold(
-          (Failure) => expect(Failure, isA<CacheFailure>()),
+          (falha) => expect(falha, isA<CacheFailure>()),
           (_) => fail('deveria ser Left'),
         );
       },
@@ -104,7 +104,7 @@ void main() {
         // Assert
         expect(resultado.isLeft(), isTrue);
         resultado.fold(
-          (Failure) => expect(Failure, isA<CacheFailure>()),
+          (falha) => expect(falha, isA<CacheFailure>()),
           (_) => fail('deveria ser Left'),
         );
       },
@@ -143,9 +143,9 @@ void main() {
 
       // Assert
       expect(resultado.isLeft(), isTrue);
-      resultado.fold((Failure) {
-        expect(Failure, isA<CacheFailure>());
-        expect(Failure.mensagem, contains('Erro ao atualizar'));
+      resultado.fold((falha) {
+        expect(falha, isA<CacheFailure>());
+        expect(falha.mensagem, contains('Erro ao atualizar'));
       }, (_) => fail('deveria ser Left'));
     });
   });
@@ -180,7 +180,7 @@ void main() {
       // Assert
       expect(resultado.isLeft(), isTrue);
       resultado.fold(
-        (Failure) => expect(Failure, isA<CacheFailure>()),
+        (falha) => expect(falha, isA<CacheFailure>()),
         (_) => fail('deveria ser Left'),
       );
     });

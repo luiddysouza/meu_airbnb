@@ -1,12 +1,12 @@
 import 'package:mobx/mobx.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/hospedagem_entity.dart';
 import '../../domain/usecases/adicionar_hospedagem.dart';
 import '../../domain/usecases/atualizar_hospedagem.dart';
 import '../../domain/usecases/deletar_hospedagem.dart';
 import '../../domain/usecases/obter_hospedagens.dart';
-import '../../../../core/usecases/usecase.dart';
 
 part 'hospedagem_store.g.dart';
 

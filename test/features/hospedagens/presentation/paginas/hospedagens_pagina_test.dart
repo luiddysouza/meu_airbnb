@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/mockito.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/core/sdui/cubit/sdui_cubit.dart';
 import 'package:meu_airbnb/core/sdui/cubit/sdui_state.dart';
@@ -16,6 +15,7 @@ import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.da
 import 'package:meu_airbnb/features/hospedagens/presentation/paginas/hospedagens_pagina.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/filtro_store.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
+import 'package:mockito/mockito.dart';
 
 import '../stores/usecases_mock.mocks.dart';
 
@@ -52,10 +52,10 @@ void main() {
     mockObterImoveis = MockObterImoveis();
 
     provideDummy<Either<Failure, List<HospedagemEntity>>>(
-      Right<Failure, List<HospedagemEntity>>([]),
+      const Right<Failure, List<HospedagemEntity>>([]),
     );
     provideDummy<Either<Failure, List<ImovelEntity>>>(
-      Right<Failure, List<ImovelEntity>>([]),
+      const Right<Failure, List<ImovelEntity>>([]),
     );
     provideDummy<Either<Failure, HospedagemEntity>>(
       Right<Failure, HospedagemEntity>(
@@ -78,10 +78,10 @@ void main() {
     // Mocks dos use cases retornam listas vazias por padrão
     when(
       mockObterHospedagens(const NoParams()),
-    ).thenAnswer((_) async => Right<Failure, List<HospedagemEntity>>([]));
+    ).thenAnswer((_) async => const Right<Failure, List<HospedagemEntity>>([]));
     when(
       mockObterImoveis(const NoParams()),
-    ).thenAnswer((_) async => Right<Failure, List<ImovelEntity>>([]));
+    ).thenAnswer((_) async => const Right<Failure, List<ImovelEntity>>([]));
 
     hospedagemStore = HospedagemStore(
       mockObterHospedagens,

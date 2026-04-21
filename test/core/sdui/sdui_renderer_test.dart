@@ -242,10 +242,10 @@ void main() {
       final mockAtualizar = MockAtualizarHospedagem();
       final mockDeletar = MockDeletarHospedagem();
       provideDummy<Either<Failure, List<ImovelEntity>>>(
-        Right<Failure, List<ImovelEntity>>([]),
+        const Right<Failure, List<ImovelEntity>>([]),
       );
       provideDummy<Either<Failure, List<HospedagemEntity>>>(
-        Right<Failure, List<HospedagemEntity>>([]),
+        const Right<Failure, List<HospedagemEntity>>([]),
       );
       provideDummy<Either<Failure, HospedagemEntity>>(
         Right<Failure, HospedagemEntity>(

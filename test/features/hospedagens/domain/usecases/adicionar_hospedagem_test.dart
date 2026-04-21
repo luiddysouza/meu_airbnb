@@ -1,10 +1,10 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/usecases/adicionar_hospedagem.dart';
+import 'package:mockito/mockito.dart';
 
 import 'hospedagem_repository_mock.mocks.dart';
 
@@ -68,16 +68,16 @@ void main() {
       'deve retornar Left(CacheFailure) quando repositório retorna Failure',
       () async {
         // Arrange
-        const Failure = CacheFailure('erro ao salvar hospedagem');
+        const falha = CacheFailure('erro ao salvar hospedagem');
         when(
           mockRepositorio.adicionar(novaHospedagem),
-        ).thenAnswer((_) async => const Left(Failure));
+        ).thenAnswer((_) async => const Left(falha));
 
         // Act
         final resultado = await useCase.call(novaHospedagem);
 
         // Assert
-        expect(resultado, const Left(Failure));
+        expect(resultado, const Left(falha));
       },
     );
 

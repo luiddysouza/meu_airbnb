@@ -1,12 +1,12 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/core/usecases/usecase.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/usecases/obter_hospedagens.dart';
+import 'package:mockito/mockito.dart';
 
 import 'hospedagem_repository_mock.mocks.dart';
 
@@ -17,10 +17,10 @@ void main() {
   setUp(() {
     mockRepositorio = MockHospedagemRepository();
     provideDummy<Either<Failure, List<HospedagemEntity>>>(
-      Right<Failure, List<HospedagemEntity>>([]),
+      const Right<Failure, List<HospedagemEntity>>([]),
     );
     provideDummy<Either<Failure, List<ImovelEntity>>>(
-      Right<Failure, List<ImovelEntity>>([]),
+      const Right<Failure, List<ImovelEntity>>([]),
     );
     useCase = ObterHospedagens(mockRepositorio);
   });
@@ -62,16 +62,16 @@ void main() {
       'deve retornar Left(CacheFailure) quando repositório retorna Failure',
       () async {
         // Arrange
-        const Failure = CacheFailure('erro ao ler hospedagens');
+        const falha = CacheFailure('erro ao ler hospedagens');
         when(
           mockRepositorio.obterTodas(),
-        ).thenAnswer((_) async => const Left(Failure));
+        ).thenAnswer((_) async => const Left(falha));
 
         // Act
         final resultado = await useCase.call(const NoParams());
 
         // Assert
-        expect(resultado, const Left(Failure));
+        expect(resultado, const Left(falha));
         verify(mockRepositorio.obterTodas()).called(1);
       },
     );

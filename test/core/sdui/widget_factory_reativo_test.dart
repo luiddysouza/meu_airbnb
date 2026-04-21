@@ -4,8 +4,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mobx/mobx.dart' hide when;
-import 'package:mockito/mockito.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/core/sdui/factory/widget_factory.dart';
 import 'package:meu_airbnb/core/sdui/models/sdui_node.dart';
@@ -14,6 +12,8 @@ import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entit
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/filtro_store.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
+import 'package:mobx/mobx.dart' hide when;
+import 'package:mockito/mockito.dart';
 
 import '../../features/hospedagens/presentation/stores/usecases_mock.mocks.dart';
 
@@ -39,10 +39,10 @@ void main() {
     mockDeletarHospedagem = MockDeletarHospedagem();
 
     provideDummy<Either<Failure, List<ImovelEntity>>>(
-      Right<Failure, List<ImovelEntity>>([]),
+      const Right<Failure, List<ImovelEntity>>([]),
     );
     provideDummy<Either<Failure, List<HospedagemEntity>>>(
-      Right<Failure, List<HospedagemEntity>>([]),
+      const Right<Failure, List<HospedagemEntity>>([]),
     );
     provideDummy<Either<Failure, HospedagemEntity>>(
       Right<Failure, HospedagemEntity>(
@@ -79,7 +79,7 @@ void main() {
     GetIt.instance.reset();
   });
 
-  Widget _construir(SduiNode no) => Builder(
+  Widget construir(SduiNode no) => Builder(
     builder: (ctx) =>
         WidgetFactory.padrao().construir(ctx, no, (c, n) => const SizedBox()),
   );
@@ -96,7 +96,7 @@ void main() {
       tester,
     ) async {
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert
       expect(find.byType(Observer), findsWidgets);
@@ -107,7 +107,7 @@ void main() {
       tester,
     ) async {
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert — verifica textos dos rótulos na tela
       expect(find.text('Entrada'), findsOneWidget);
@@ -119,7 +119,7 @@ void main() {
     ) async {
       // Act
       await tester.pumpWidget(
-        _app(_construir(const SduiNode(tipo: 'seletor_data_range'))),
+        _app(construir(const SduiNode(tipo: 'seletor_data_range'))),
       );
 
       // Assert
@@ -131,7 +131,7 @@ void main() {
       'reconstrói ao selecionar período — periodoSelecionado refletido',
       (tester) async {
         // Arrange
-        await tester.pumpWidget(_app(_construir(no)));
+        await tester.pumpWidget(_app(construir(no)));
         expect(filtroStore.periodoSelecionado, isNull);
 
         // Act — muda o observable diretamente
@@ -159,7 +159,7 @@ void main() {
 
     testWidgets('renderiza DsDropdown envolto em Observer', (tester) async {
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert
       expect(find.byType(Observer), findsWidgets);
@@ -176,7 +176,7 @@ void main() {
       });
 
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert — DsDropdown recebeu 2 opções
       final dropdown = tester.widget<DsDropdown>(find.byType(DsDropdown));
@@ -189,7 +189,7 @@ void main() {
       tester,
     ) async {
       // Arrange — começa sem imóveis
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
       var dropdown = tester.widget<DsDropdown>(find.byType(DsDropdown));
       expect(dropdown.opcoes, isEmpty);
 
@@ -213,7 +213,7 @@ void main() {
       });
 
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert
       final dropdown = tester.widget<DsDropdown>(find.byType(DsDropdown));
@@ -244,7 +244,7 @@ void main() {
 
     testWidgets('renderiza DsLista envolto em Observer', (tester) async {
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert
       expect(find.byType(Observer), findsWidgets);
@@ -255,7 +255,7 @@ void main() {
       'exibe mensagem de estado vazio quando hospedagensFiltradas está vazia',
       (tester) async {
         // Act
-        await tester.pumpWidget(_app(_construir(no)));
+        await tester.pumpWidget(_app(construir(no)));
 
         // Assert
         expect(find.text('Sem hospedagens'), findsOneWidget);
@@ -274,7 +274,7 @@ void main() {
       });
 
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert
       expect(find.byType(DsCardHospedagem), findsNWidgets(2));
@@ -292,7 +292,7 @@ void main() {
       });
 
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert
       expect(find.text('Casa da Praia'), findsOneWidget);
@@ -302,7 +302,7 @@ void main() {
       tester,
     ) async {
       // Arrange — começa vazia
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
       expect(find.byType(DsCardHospedagem), findsNothing);
 
       // Act
@@ -319,9 +319,7 @@ void main() {
       'usa mensagem padrão quando prop vazio_mensagem não está no SDUI',
       (tester) async {
         // Act
-        await tester.pumpWidget(
-          _app(_construir(const SduiNode(tipo: 'lista'))),
-        );
+        await tester.pumpWidget(_app(construir(const SduiNode(tipo: 'lista'))));
 
         // Assert
         expect(find.text('Nenhuma hospedagem encontrada'), findsOneWidget);
@@ -357,7 +355,7 @@ void main() {
       });
 
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert — ícone de edição presente
       expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
@@ -370,7 +368,7 @@ void main() {
       });
 
       // Act
-      await tester.pumpWidget(_app(_construir(no)));
+      await tester.pumpWidget(_app(construir(no)));
 
       // Assert — ícone de deletar presente
       expect(find.byIcon(Icons.delete_outline), findsOneWidget);
@@ -387,7 +385,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: DsTemaApp.tema,
-            home: Scaffold(body: SingleChildScrollView(child: _construir(no))),
+            home: Scaffold(body: SingleChildScrollView(child: construir(no))),
           ),
         );
 
@@ -417,7 +415,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: DsTemaApp.tema,
-          home: Scaffold(body: SingleChildScrollView(child: _construir(no))),
+          home: Scaffold(body: SingleChildScrollView(child: construir(no))),
         ),
       );
 
@@ -442,7 +440,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: DsTemaApp.tema,
-          home: Scaffold(body: SingleChildScrollView(child: _construir(no))),
+          home: Scaffold(body: SingleChildScrollView(child: construir(no))),
         ),
       );
 
@@ -467,7 +465,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: DsTemaApp.tema,
-            home: Scaffold(body: SingleChildScrollView(child: _construir(no))),
+            home: Scaffold(body: SingleChildScrollView(child: construir(no))),
           ),
         );
 

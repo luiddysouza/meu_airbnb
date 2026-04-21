@@ -1,8 +1,8 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mockito/mockito.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/usecases/deletar_hospedagem.dart';
+import 'package:mockito/mockito.dart';
 
 import 'hospedagem_repository_mock.mocks.dart';
 
@@ -38,16 +38,16 @@ void main() {
       'deve retornar Left(CacheFailure) quando repositório retorna Failure',
       () async {
         // Arrange
-        const Failure = CacheFailure('hospedagem não encontrada');
+        const falha = CacheFailure('hospedagem não encontrada');
         when(
           mockRepositorio.deletar('id-inexistente'),
-        ).thenAnswer((_) async => const Left(Failure));
+        ).thenAnswer((_) async => const Left(falha));
 
         // Act
         final resultado = await useCase.call('id-inexistente');
 
         // Assert
-        expect(resultado, const Left(Failure));
+        expect(resultado, const Left(falha));
       },
     );
 

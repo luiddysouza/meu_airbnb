@@ -140,7 +140,7 @@ void main() {
             builder: (ctx) => fabrica.construir(
               ctx,
               no,
-              (c, n) => fabrica.construir(c, n, (_, __) => const SizedBox()),
+              (c, n) => fabrica.construir(c, n, (_, _) => const SizedBox()),
             ),
           ),
         ),

@@ -1,5 +1,5 @@
-﻿import 'package:mockito/annotations.dart';
-import 'package:meu_airbnb/features/hospedagens/domain/repositories/hospedagem_repository.dart';
+﻿import 'package:meu_airbnb/features/hospedagens/domain/repositories/hospedagem_repository.dart';
+import 'package:mockito/annotations.dart';
 
 /// Gera o MockHospedagemRepository usado nos testes de use cases.
 ///

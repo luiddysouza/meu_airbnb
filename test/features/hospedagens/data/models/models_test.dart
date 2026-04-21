@@ -1,9 +1,9 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:meu_airbnb/features/hospedagens/data/models/hospedagem_model.dart';
+import 'package:meu_airbnb/features/hospedagens/data/models/imovel_model.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
-import 'package:meu_airbnb/features/hospedagens/data/models/hospedagem_model.dart';
-import 'package:meu_airbnb/features/hospedagens/data/models/imovel_model.dart';
 
 final _checkIn = DateTime(2024, 1, 10, 14);
 final _checkOut = DateTime(2024, 1, 15, 11);

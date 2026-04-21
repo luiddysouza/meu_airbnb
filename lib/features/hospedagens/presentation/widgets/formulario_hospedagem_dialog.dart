@@ -434,11 +434,11 @@ class _ErroFormulario extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(DsEspacamentos.sm),
       decoration: BoxDecoration(
-        color: DsCores.erro.withOpacity(0.08),
+        color: DsCores.erro.withValues(alpha: 0.08),
         borderRadius: const BorderRadius.all(
           Radius.circular(DsEspacamentos.radiusSm),
         ),
-        border: Border.all(color: DsCores.erro.withOpacity(0.3)),
+        border: Border.all(color: DsCores.erro.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
