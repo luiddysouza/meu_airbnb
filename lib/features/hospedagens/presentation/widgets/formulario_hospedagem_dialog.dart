@@ -199,6 +199,7 @@ class _FormularioHospedagemDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: DsCores.branco,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(DsEspacamentos.radiusMd),
@@ -335,25 +336,36 @@ class _FormularioHospedagemDialogState
                   controlador: _notasCtrl,
                   maxLinhas: 3,
                 ),
+                const SizedBox(height: DsEspacamentos.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: _salvando
+                          ? null
+                          : () => Navigator.of(context).pop(false),
+                      child: Text(
+                        'Cancelar',
+                        style: DsTipografia.labelLarge.copyWith(
+                          color: DsCores.cinza500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: DsEspacamentos.sm),
+                    DsBotaoPrimario(
+                      rotulo: _edicao
+                          ? 'Salvar alterações'
+                          : 'Criar hospedagem',
+                      carregando: _salvando,
+                      aoTocar: _salvando ? null : _salvar,
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: _salvando ? null : () => Navigator.of(context).pop(false),
-          child: Text(
-            'Cancelar',
-            style: DsTipografia.labelLarge.copyWith(color: DsCores.cinza500),
-          ),
-        ),
-        DsBotaoPrimario(
-          rotulo: _edicao ? 'Salvar alterações' : 'Criar hospedagem',
-          carregando: _salvando,
-          aoTocar: _salvando ? null : _salvar,
-        ),
-      ],
     );
   }
 }
