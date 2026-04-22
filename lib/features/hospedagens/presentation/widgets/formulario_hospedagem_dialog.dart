@@ -72,10 +72,10 @@ class _FormularioHospedagemDialogState
   late final TextEditingController _valorTotalCtrl;
   late final TextEditingController _notasCtrl;
 
-  late DateTime _checkIn;
-  late DateTime _checkOut;
-  late StatusHospedagem _status;
-  late Plataforma _plataforma;
+  DateTime? _checkIn;
+  DateTime? _checkOut;
+  StatusHospedagem? _status;
+  Plataforma? _plataforma;
   String? _imovelId;
 
   bool _salvando = false;
@@ -89,16 +89,16 @@ class _FormularioHospedagemDialogState
     final h = widget.hospedagem;
     _nomeHospedeCtrl = TextEditingController(text: h?.nomeHospede ?? '');
     _numHospedesCtrl = TextEditingController(
-      text: h?.numHospedes.toString() ?? '1',
+      text: h?.numHospedes.toString() ?? '',
     );
     _valorTotalCtrl = TextEditingController(
       text: h != null ? h.valorTotal.toStringAsFixed(2) : '',
     );
     _notasCtrl = TextEditingController(text: h?.notas ?? '');
-    _checkIn = h?.checkIn ?? DateTime.now();
-    _checkOut = h?.checkOut ?? DateTime.now().add(const Duration(days: 1));
-    _status = h?.status ?? StatusHospedagem.pendente;
-    _plataforma = h?.plataforma ?? Plataforma.airbnb;
+    _checkIn = h?.checkIn;
+    _checkOut = h?.checkOut;
+    _status = h?.status;
+    _plataforma = h?.plataforma;
     _imovelId = (h != null && h.imovelId.isNotEmpty) ? h.imovelId : null;
 
     // Garante que o imovelId existe na lista; se não, ignora.
@@ -119,7 +119,7 @@ class _FormularioHospedagemDialogState
   Future<void> _selecionarCheckIn() async {
     final data = await showDatePicker(
       context: context,
-      initialDate: _checkIn,
+      initialDate: _checkIn ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
       helpText: 'Check-in',
@@ -128,18 +128,21 @@ class _FormularioHospedagemDialogState
       setState(() {
         _checkIn = data;
         // Garante que checkOut não fique antes de checkIn.
-        if (_checkOut.isBefore(_checkIn)) {
-          _checkOut = _checkIn.add(const Duration(days: 1));
+        if (_checkOut != null && _checkOut!.isBefore(data)) {
+          _checkOut = data.add(const Duration(days: 1));
         }
       });
     }
   }
 
   Future<void> _selecionarCheckOut() async {
+    final inicio = _checkIn ?? DateTime.now();
     final data = await showDatePicker(
       context: context,
-      initialDate: _checkOut.isAfter(_checkIn) ? _checkOut : _checkIn,
-      firstDate: _checkIn,
+      initialDate: (_checkOut != null && _checkOut!.isAfter(inicio))
+          ? _checkOut!
+          : inicio,
+      firstDate: inicio,
       lastDate: DateTime(2030),
       helpText: 'Check-out',
     );
@@ -151,6 +154,21 @@ class _FormularioHospedagemDialogState
   Future<void> _salvar() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_checkIn == null || _checkOut == null) {
+      setState(
+        () => _erroFormulario = 'Selecione as datas de check-in e check-out',
+      );
+      return;
+    }
+    if (_status == null || _plataforma == null) {
+      setState(() => _erroFormulario = 'Selecione o status e a plataforma');
+      return;
+    }
+    if (widget.imoveis.isNotEmpty && _imovelId == null) {
+      setState(() => _erroFormulario = 'Selecione o imóvel');
+      return;
+    }
+
     setState(() {
       _salvando = true;
       _erroFormulario = null;
@@ -159,13 +177,13 @@ class _FormularioHospedagemDialogState
     final hospedagem = HospedagemEntity(
       id: widget.hospedagem?.id ?? '',
       nomeHospede: _nomeHospedeCtrl.text.trim(),
-      checkIn: _checkIn,
-      checkOut: _checkOut,
+      checkIn: _checkIn!,
+      checkOut: _checkOut!,
       numHospedes: int.tryParse(_numHospedesCtrl.text) ?? 1,
       valorTotal:
           double.tryParse(_valorTotalCtrl.text.replaceAll(',', '.')) ?? 0.0,
-      status: _status,
-      plataforma: _plataforma,
+      status: _status!,
+      plataforma: _plataforma!,
       imovelId: _imovelId ?? '',
       notas: _notasCtrl.text.trim().isEmpty ? null : _notasCtrl.text.trim(),
       criadoEm: widget.hospedagem?.criadoEm ?? DateTime.now(),
@@ -235,7 +253,9 @@ class _FormularioHospedagemDialogState
                     Expanded(
                       child: _CampoData(
                         rotulo: 'Check-in',
-                        valor: _formatarData(_checkIn),
+                        valor: _checkIn != null
+                            ? _formatarData(_checkIn!)
+                            : '—',
                         aoTocar: _selecionarCheckIn,
                       ),
                     ),
@@ -243,7 +263,9 @@ class _FormularioHospedagemDialogState
                     Expanded(
                       child: _CampoData(
                         rotulo: 'Check-out',
-                        valor: _formatarData(_checkOut),
+                        valor: _checkOut != null
+                            ? _formatarData(_checkOut!)
+                            : '—',
                         aoTocar: _selecionarCheckOut,
                       ),
                     ),
@@ -291,7 +313,7 @@ class _FormularioHospedagemDialogState
                 DsDropdown(
                   rotulo: 'Status',
                   opcoes: _opcoesStatus,
-                  valorSelecionado: _status.name,
+                  valorSelecionado: _status?.name,
                   aoSelecionar: (v) {
                     if (v != null) {
                       setState(
@@ -306,7 +328,7 @@ class _FormularioHospedagemDialogState
                 DsDropdown(
                   rotulo: 'Plataforma',
                   opcoes: _opcoesPlataforma,
-                  valorSelecionado: _plataforma.name,
+                  valorSelecionado: _plataforma?.name,
                   aoSelecionar: (v) {
                     if (v != null) {
                       setState(
