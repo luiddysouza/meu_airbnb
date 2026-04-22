@@ -12,13 +12,15 @@ Projeto de portfólio com foco em arquitetura avançada: **Clean Architecture**,
 
 ## Funcionalidades
 
+- Tela de **splash** com indicador de carregamento e redirecionamento automático
+- **Login com autenticação mock** e guard de rota (rotas protegidas redirecionam para `/login`)
 - Listar, criar, editar e excluir hospedagens com **optimistic updates**
-- Filtrar por período (check-in / check-out) e por imóvel
+- Filtrar por período (check-in / check-out) e por imóvel — com **botão de limpar (X)** em cada filtro
 - Interface **responsiva** — sidebar em desktop (≥ 900 px), coluna única em mobile
 - Layout definido por JSON (**Server-Driven UI**) — trocar o JSON muda a UI sem recompilar
 - Confirmação de exclusão e snackbar de feedback (sucesso / erro)
 - Catálogo visual interativo dos componentes (**Widgetbook**)
-- **242 testes** (unit + widget) com cobertura ≥ 80 %
+- Cobertura de testes ≥ 80 %
 
 ---
 
@@ -134,8 +136,8 @@ Documentação completa: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)
 meu_airbnb/
 ├── .github/
 │   ├── copilot-instructions.md      # Contexto de arquitetura para Copilot
+│   ├── prompts/                     # Prompts reutilizáveis para IA (slash commands)
 │   └── workflows/flutter.yml        # CI/CD — analyze + test + build
-├── .vscode/prompts/                 # Prompts reutilizáveis para IA
 ├── assets/mock/                     # JSONs SDUI + dados mock
 ├── packages/design_system/          # Design System (package separado)
 ├── widgetbook/                      # Catálogo visual de componentes
@@ -143,14 +145,14 @@ meu_airbnb/
 │   ├── core/
 │   │   ├── di/          # get_it — injecao.dart
 │   │   ├── erros/       # Failure abstrata + CacheFailure
-│   │   ├── roteamento/  # go_router
+│   │   ├── roteamento/  # go_router (splash → login → /)
 │   │   ├── sdui/        # Engine SDUI (models, parser, renderer, factory, cubit)
 │   │   └── usecases/    # Contrato UseCase<Output, Params>
-│   └── features/hospedagens/
-│       ├── data/        # Models, DataSource, RepositoryImpl
-│       ├── domain/      # Entities, UseCases, Repository contract
-│       └── presentation/# MobX Stores, páginas, widgets
-├── test/                            # 242 testes
+│   └── features/
+│       ├── auth/        # AuthStore + LoginPagina + UsuarioEntity
+│       ├── hospedagens/ # data / domain / presentation
+│       └── splash/      # SplashPagina
+├── test/                            # Testes unitários e de widget
 └── docs/                            # Documentação detalhada
 ```
 
@@ -251,7 +253,7 @@ GitHub Actions (`.github/workflows/flutter.yml`) — executado em push/PR para `
 
 ## Workflow IA
 
-Prompts reutilizáveis em `.vscode/prompts/`:
+Prompts reutilizáveis em `.github/prompts/` (disponíveis como slash commands no Copilot via `/`):
 
 | Prompt | Uso |
 |---|---|
@@ -260,7 +262,7 @@ Prompts reutilizáveis em `.vscode/prompts/`:
 | `review-code.prompt.md` | Checklist de review (arquitetura, testes, SDUI, Either, optimistic) |
 | `gerar-json-sdui.prompt.md` | Gera JSON SDUI para nova tela |
 
-Contexto de arquitetura para o Copilot: `.github/copilot-instructions.md`
+Contexto de arquitetura (carregado automaticamente): `.github/copilot-instructions.md`
 
 ---
 

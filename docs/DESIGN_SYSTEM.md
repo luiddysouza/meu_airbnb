@@ -86,7 +86,31 @@ A ideia é que todos os espaçamentos são múltiplos de 4 (com exceção de `sm
 
 3. **Construtor `const`** — Sempre que possível, construtores são `const` para permitir otimização em árvores de widgets.
 
-4. **Parâmetros em português** — Seguindo a convenção do projeto: `rotulo`, `aoTocar`, `carregando`, não `label`, `onTap`, `loading`.
+4. **Parâmetros em português** — Seguindo a convenção do projeto: `rotulo`, `aoTocar`, `carregando`, `aoLimpar`, não `label`, `onTap`, `loading`, `onClear`.
+
+### Parâmetro `aoLimpar` nos seletores
+
+`DsDateRangePicker` e `DsDropdown` aceitam o parâmetro opcional `aoLimpar: VoidCallback?`. Quando fornecido e há um valor selecionado, o componente exibe um ícone de fechar (X) que, ao ser tocado, chama o callback para limpar o filtro.
+
+```dart
+DsDateRangePicker(
+  rotuloInicio: 'Check-in',
+  rotuloFim: 'Check-out',
+  periodoSelecionado: filtroStore.periodoSelecionado,
+  aoSelecionar: filtroStore.selecionarPeriodo,
+  aoLimpar: () => filtroStore.selecionarPeriodo(null), // botão X aparecerá
+)
+
+DsDropdown(
+  rotulo: 'Imóvel',
+  opcoes: opcoes,
+  valorSelecionado: filtroStore.imovelSelecionadoId,
+  aoSelecionar: filtroStore.selecionarImovel,
+  aoLimpar: () => filtroStore.selecionarImovel(null),  // botão X aparecerá
+)
+```
+
+> `DsDropdown` usa `key: ValueKey(valorSelecionado)` internamente para forçar rebuild reativo quando o valor é zerado externamente.
 
 ### Estrutura de pastas dos componentes
 

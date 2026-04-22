@@ -89,6 +89,7 @@ UI e estado reativo.
 - `@observable String? erro`
 - Actions: `carregarHospedagens`, `adicionarHospedagem`, `atualizarHospedagem`, `deletarHospedagem`
 - Todas as actions de escrita seguem o **Optimistic State Pattern**
+- A lista é sempre mutada in-place (`..clear()..addAll()`) para preservar a referência usada pelo `FiltroStore`
 
 `FiltroStore`:
 - `@observable DateTimeRange? periodoSelecionado`
@@ -96,10 +97,21 @@ UI e estado reativo.
 - `@observable ObservableList<ImovelEntity> imoveis`
 - `@computed List<HospedagemEntity> hospedagensFiltradas` — filtra por período + imóvel
 - Mantém referência a `todasHospedagens` do `HospedagemStore` via binding externo
+- `selecionarPeriodo(null)` e `selecionarImovel(null)` limpam os filtros (usados pelo botão X)
+
+`AuthStore`:
+- `@observable bool estaLogado`
+- `@observable bool carregando`
+- `@observable String? erro`
+- `@action Future<void> entrar(email, senha)` — mock: valida e-mail não vazio + senha ≥ 6 chars
+- `@action void sair()` — reseta o estado
+- Pronto para substituir a lógica mock por chamada de API real
 
 **Páginas e Widgets**
+- `SplashPagina` — exibe logo + `DsCarregando`, redireciona para `/login` após 2 s
+- `LoginPagina` — formulário e-mail + senha com `Observer` no erro e no botão; sucesso redireciona para `/`
 - `HospedagensPagina` — consome `SduiCubit` via `BlocBuilder`
-- `FormularioHospedagemDialog` — cria/edita hospedagem com campos completos, validação e loading state
+- `FormularioHospedagemDialog` — cria/edita hospedagem com campos completos, validação obrigatória e loading state
 - Widgets de layout e dados vêm do Design System (`packages/design_system/`)
 
 ### SDUI Engine
@@ -207,12 +219,29 @@ DataSource
   → RepositoryImpl
     → Use Cases
       → Stores MobX (HospedagemStore, FiltroStore)
-        → SduiCubit
+        → AuthStore
+          → SduiCubit
 ```
 
-Uso: `sl<HospedagemStore>()` em qualquer ponto do app após `configurarInjecao()`.
+Uso: `sl<HospedagemStore>()` em qualquer ponto do app após `inicializarDependencias()`.
 
-Stores e use cases são registrados como `LazySingleton` — criados na primeira resolução.
+Stores são registrados como `Singleton`; use cases como `Factory`; `SduiCubit` como `Factory`.
+
+---
+
+## Roteamento
+
+GoRouter configurado em `lib/core/roteamento/rotas.dart`.
+
+| Rota | Página | Protégida? |
+|---|---|---|
+| `/splash` | `SplashPagina` | Não |
+| `/login` | `LoginPagina` | Não |
+| `/` | `HospedagensPagina` | Sim |
+
+`initialLocation: '/splash'` — a splash screen é sempre o ponto de entrada.
+
+Guard global via `redirect`: se `AuthStore.estaLogado == false` e a rota não está no conjunto `{'/splash', '/login'}`, redireciona para `/login`. Quando o login é bem-sucedido, `context.go('/')` navega diretamente para a tela principal.
 
 ---
 

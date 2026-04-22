@@ -11,7 +11,9 @@ Roadmap pós-MVP, priorizado por impacto técnico e valor de portfólio.
 Substituir `HospedagemLocalDataSource` por um datasource remoto.  
 A arquitetura já está preparada: basta criar `HospedagemRemoteDataSource` implementando a mesma interface, registrar no `get_it` e trocar. Domain e Presentation não precisam mudar.
 
-- Autenticação por e-mail/senha
+> **UI e fluxo de autenticação já implementados** (`AuthStore`, `LoginPagina`, guard de rota).
+> Pendente: conectar `AuthStore.entrar()` a um provider real (Supabase Auth, Firebase Auth, etc.).
+
 - Banco de dados em tempo real (Realtime do Supabase ou Firestore)
 - `ServerFailure` já reservado na hierarquia de erros
 - Substituir `Future.delayed` por chamadas HTTP reais
