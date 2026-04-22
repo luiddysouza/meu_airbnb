@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 import '../factory/widget_factory.dart';
 import '../models/sdui_node.dart';
@@ -22,6 +23,7 @@ class SduiRenderer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: DsEspacamentos.md,
       children: nos.map((no) => _renderizarNo(context, no)).toList(),
     );
   }
