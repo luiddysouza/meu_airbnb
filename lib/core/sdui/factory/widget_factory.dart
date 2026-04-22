@@ -98,6 +98,7 @@ class WidgetFactory {
         rotuloFim: props['rotulo_fim'] as String? ?? 'Check-out',
         periodoSelecionado: filtroStore.periodoSelecionado,
         aoSelecionar: (range) => filtroStore.selecionarPeriodo(range),
+        aoLimpar: () => filtroStore.selecionarPeriodo(null),
       ),
     );
   }
@@ -117,6 +118,7 @@ class WidgetFactory {
             .toList(),
         valorSelecionado: filtroStore.imovelSelecionadoId,
         aoSelecionar: filtroStore.selecionarImovel,
+        aoLimpar: () => filtroStore.selecionarImovel(null),
       ),
     );
   }
