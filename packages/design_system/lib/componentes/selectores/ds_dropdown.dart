@@ -20,6 +20,7 @@ class DsDropdown extends StatelessWidget {
     this.valorSelecionado,
     this.habilitado = true,
     this.textoHelper,
+    this.aoLimpar,
   });
 
   final String rotulo;
@@ -28,10 +29,12 @@ class DsDropdown extends StatelessWidget {
   final ValueChanged<String?> aoSelecionar;
   final bool habilitado;
   final String? textoHelper;
+  final VoidCallback? aoLimpar;
 
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
+      key: ValueKey(valorSelecionado),
       initialValue: valorSelecionado,
       onChanged: habilitado ? aoSelecionar : null,
       items: opcoes
@@ -45,6 +48,16 @@ class DsDropdown extends StatelessWidget {
       decoration: InputDecoration(
         labelText: rotulo,
         helperText: textoHelper,
+        suffix: (aoLimpar != null && valorSelecionado != null)
+            ? GestureDetector(
+                onTap: aoLimpar,
+                child: const Icon(
+                  Icons.close,
+                  size: 16,
+                  color: DsCores.cinza500,
+                ),
+              )
+            : null,
         border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(DsEspacamentos.radiusSm),

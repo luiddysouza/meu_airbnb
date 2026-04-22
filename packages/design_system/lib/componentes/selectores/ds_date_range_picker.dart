@@ -13,6 +13,7 @@ class DsDateRangePicker extends StatelessWidget {
     this.periodoSelecionado,
     this.primeiroDia,
     this.ultimoDia,
+    this.aoLimpar,
   });
 
   final String rotuloInicio;
@@ -21,6 +22,7 @@ class DsDateRangePicker extends StatelessWidget {
   final ValueChanged<DateTimeRange> aoSelecionar;
   final DateTime? primeiroDia;
   final DateTime? ultimoDia;
+  final VoidCallback? aoLimpar;
 
   static String _formatarData(DateTime? data) {
     if (data == null) return '—';
@@ -66,6 +68,16 @@ class DsDateRangePicker extends StatelessWidget {
             aoTocar: () => _abrirSeletor(context),
           ),
         ),
+        if (periodoSelecionado != null && aoLimpar != null) ...[
+          const SizedBox(width: DsEspacamentos.xs),
+          IconButton(
+            onPressed: aoLimpar,
+            icon: const Icon(Icons.close, size: 18, color: DsCores.cinza500),
+            tooltip: 'Limpar filtro',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
       ],
     );
   }
