@@ -34,7 +34,6 @@ class DsDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      key: ValueKey(valorSelecionado),
       initialValue: valorSelecionado,
       onChanged: habilitado ? aoSelecionar : null,
       items: opcoes

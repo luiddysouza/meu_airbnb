@@ -35,7 +35,7 @@ class DsBotaoPrimario extends StatelessWidget {
           ),
         ),
         textStyle: DsTipografia.labelLarge,
-        minimumSize: const Size(double.infinity, 48),
+        minimumSize: const Size(0, 48),
       ),
       child: _buildFilho(),
     );
