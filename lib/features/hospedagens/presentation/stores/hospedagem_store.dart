@@ -63,7 +63,9 @@ abstract class _HospedagemStore with Store {
         carregando = false;
       },
       (lista) {
-        hospedagens = ObservableList.of(lista);
+        hospedagens
+          ..clear()
+          ..addAll(lista);
         carregando = false;
       },
     );
@@ -88,7 +90,9 @@ abstract class _HospedagemStore with Store {
     resultado.fold(
       (failure) {
         // Rollback
-        hospedagens = ObservableList.of(snapshot);
+        hospedagens
+          ..clear()
+          ..addAll(snapshot);
         erro = failure.mensagem;
       },
       (_) {
@@ -114,7 +118,9 @@ abstract class _HospedagemStore with Store {
     resultado.fold(
       (failure) {
         // Rollback
-        hospedagens = ObservableList.of(snapshot);
+        hospedagens
+          ..clear()
+          ..addAll(snapshot);
         erro = failure.mensagem;
       },
       (_) {
@@ -137,7 +143,9 @@ abstract class _HospedagemStore with Store {
     resultado.fold(
       (failure) {
         // Rollback
-        hospedagens = ObservableList.of(snapshot);
+        hospedagens
+          ..clear()
+          ..addAll(snapshot);
         erro = failure.mensagem;
       },
       (_) {
