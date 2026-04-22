@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 
+import '../../features/auth/presentation/stores/auth_store.dart';
 import '../../features/hospedagens/data/datasources/hospedagem_local_datasource.dart';
 import '../../features/hospedagens/data/repositories/hospedagem_repository_impl.dart';
 import '../../features/hospedagens/domain/repositories/hospedagem_repository.dart';
@@ -57,6 +58,9 @@ Future<void> inicializarDependencias() async {
   filtroStore.todasHospedagens = sl<HospedagemStore>().hospedagens;
   sl.registerSingleton<FiltroStore>(filtroStore);
 
-  // ── 5. SduiCubit ───────────────────────────────────────────────────────────
+  // ── 5. Auth Store ───────────────────────────────────────────────────────────
+  sl.registerSingleton<AuthStore>(AuthStore());
+
+  // ── 6. SduiCubit ───────────────────────────────────────────────────────────
   sl.registerFactory<SduiCubit>(() => SduiCubit());
 }
