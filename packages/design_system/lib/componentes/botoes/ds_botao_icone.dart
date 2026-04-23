@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../tokens/bordas.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/espacamentos.dart';
 
@@ -26,11 +27,10 @@ class DsBotaoIcone extends StatelessWidget {
     final botao = IconButton(
       onPressed: carregando ? null : aoTocar,
       icon: carregando
-          ? SizedBox(
-              height: 20,
-              width: 20,
+          ? SizedBox.square(
+              dimension: DsAlturas.spinnerBotao,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
+                strokeWidth: DsBordas.progressIndicator,
                 valueColor: AlwaysStoppedAnimation<Color>(corEfetiva),
               ),
             )

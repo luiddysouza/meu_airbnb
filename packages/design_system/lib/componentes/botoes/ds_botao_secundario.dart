@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../tokens/bordas.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/espacamentos.dart';
+import '../../tokens/icones.dart';
 import '../../tokens/tipografia.dart';
 
 class DsBotaoSecundario extends StatelessWidget {
@@ -24,7 +26,7 @@ class DsBotaoSecundario extends StatelessWidget {
       onPressed: carregando ? null : aoTocar,
       style: OutlinedButton.styleFrom(
         foregroundColor: DsCores.primaria,
-        side: const BorderSide(color: DsCores.primaria, width: 1.5),
+        side: const BorderSide(color: DsCores.primaria, width: DsBordas.fina),
         padding: const EdgeInsets.symmetric(
           horizontal: DsEspacamentos.lg,
           vertical: DsEspacamentos.md,
@@ -35,7 +37,7 @@ class DsBotaoSecundario extends StatelessWidget {
           ),
         ),
         textStyle: DsTipografia.labelLarge,
-        minimumSize: const Size(double.infinity, 48),
+        minimumSize: const Size(double.infinity, DsAlturas.botaoPadrao),
       ),
       child: _buildFilho(),
     );
@@ -43,11 +45,10 @@ class DsBotaoSecundario extends StatelessWidget {
 
   Widget _buildFilho() {
     if (carregando) {
-      return const SizedBox(
-        height: 20,
-        width: 20,
+      return const SizedBox.square(
+        dimension: DsAlturas.spinnerBotao,
         child: CircularProgressIndicator(
-          strokeWidth: 2,
+          strokeWidth: DsBordas.progressIndicator,
           valueColor: AlwaysStoppedAnimation<Color>(DsCores.primaria),
         ),
       );
@@ -56,7 +57,7 @@ class DsBotaoSecundario extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icone, size: 18),
+          Icon(icone, size: DsIcones.md),
           const SizedBox(width: DsEspacamentos.xs),
           Text(rotulo),
         ],
