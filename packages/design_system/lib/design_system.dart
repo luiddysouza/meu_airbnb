@@ -3,6 +3,9 @@ export 'tokens/cores.dart';
 export 'tokens/tipografia.dart';
 export 'tokens/espacamentos.dart';
 export 'tokens/sombras.dart';
+export 'tokens/icones.dart';
+export 'tokens/bordas.dart';
+export 'tokens/animacoes.dart';
 
 // Tema
 export 'tema/tema_app.dart';

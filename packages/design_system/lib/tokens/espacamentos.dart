@@ -28,3 +28,11 @@ abstract final class DsEspacamentos {
   static const double radiusXl = 24;
   static const double radiusCircular = 999;
 }
+
+abstract final class DsAlturas {
+  /// Altura mínima padrão dos botões — 48px
+  static const double botaoPadrao = 48;
+
+  /// Dimensão do SizedBox do CircularProgressIndicator em botões — 20px
+  static const double spinnerBotao = 20;
+}
