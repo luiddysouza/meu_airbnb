@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../tokens/cores.dart';
 import '../tokens/tipografia.dart';
 import 'tema_extensoes.dart';
@@ -17,22 +18,24 @@ abstract final class DsTemaApp {
       onError: DsCores.branco,
       onSurface: DsCores.cinza900,
     ),
-    textTheme: TextTheme(
-      displayLarge: DsTipografia.displayLarge,
-      displayMedium: DsTipografia.displayMedium,
-      displaySmall: DsTipografia.displaySmall,
-      headlineLarge: DsTipografia.headlineLarge,
-      headlineMedium: DsTipografia.headlineMedium,
-      headlineSmall: DsTipografia.headlineSmall,
-      titleLarge: DsTipografia.titleLarge,
-      titleMedium: DsTipografia.titleMedium,
-      titleSmall: DsTipografia.titleSmall,
-      bodyLarge: DsTipografia.bodyLarge,
-      bodyMedium: DsTipografia.bodyMedium,
-      bodySmall: DsTipografia.bodySmall,
-      labelLarge: DsTipografia.labelLarge,
-      labelMedium: DsTipografia.labelMedium,
-      labelSmall: DsTipografia.labelSmall,
+    textTheme: GoogleFonts.robotoTextTheme(
+      TextTheme(
+        displayLarge: DsTipografia.displayLarge,
+        displayMedium: DsTipografia.displayMedium,
+        displaySmall: DsTipografia.displaySmall,
+        headlineLarge: DsTipografia.headlineLarge,
+        headlineMedium: DsTipografia.headlineMedium,
+        headlineSmall: DsTipografia.headlineSmall,
+        titleLarge: DsTipografia.titleLarge,
+        titleMedium: DsTipografia.titleMedium,
+        titleSmall: DsTipografia.titleSmall,
+        bodyLarge: DsTipografia.bodyLarge,
+        bodyMedium: DsTipografia.bodyMedium,
+        bodySmall: DsTipografia.bodySmall,
+        labelLarge: DsTipografia.labelLarge,
+        labelMedium: DsTipografia.labelMedium,
+        labelSmall: DsTipografia.labelSmall,
+      ),
     ),
     extensions: const [DsTemaExtensao()],
   );
