@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../tokens/bordas.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/espacamentos.dart';
+import '../../tokens/icones.dart';
 import '../../tokens/tipografia.dart';
 
 class DsOpcaoDropdown {
@@ -52,7 +54,7 @@ class DsDropdown extends StatelessWidget {
                 onTap: aoLimpar,
                 child: const Icon(
                   Icons.close,
-                  size: 16,
+                  size: DsIcones.sm,
                   color: DsCores.cinza500,
                 ),
               )
@@ -73,7 +75,10 @@ class DsDropdown extends StatelessWidget {
           borderRadius: BorderRadius.all(
             Radius.circular(DsEspacamentos.radiusSm),
           ),
-          borderSide: BorderSide(color: DsCores.primaria, width: 2),
+          borderSide: BorderSide(
+            color: DsCores.primaria,
+            width: DsBordas.media,
+          ),
         ),
         disabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/cores.dart';
 import '../../tokens/espacamentos.dart';
+import '../../tokens/icones.dart';
 import '../../tokens/tipografia.dart';
 
 class DsDateRangePicker extends StatelessWidget {
@@ -72,7 +73,11 @@ class DsDateRangePicker extends StatelessWidget {
           const SizedBox(width: DsEspacamentos.xs),
           IconButton(
             onPressed: aoLimpar,
-            icon: const Icon(Icons.close, size: 18, color: DsCores.cinza500),
+            icon: const Icon(
+              Icons.close,
+              size: DsIcones.md,
+              color: DsCores.cinza500,
+            ),
             tooltip: 'Limpar filtro',
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -104,7 +109,7 @@ class _CampoData extends StatelessWidget {
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: rotulo,
-          suffixIcon: const Icon(Icons.calendar_today, size: 18),
+          suffixIcon: const Icon(Icons.calendar_today, size: DsIcones.md),
           border: const OutlineInputBorder(
             borderRadius: BorderRadius.all(
               Radius.circular(DsEspacamentos.radiusSm),

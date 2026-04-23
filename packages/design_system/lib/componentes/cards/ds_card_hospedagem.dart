@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/cores.dart';
 import '../../tokens/espacamentos.dart';
+import '../../tokens/icones.dart';
 import '../../tokens/sombras.dart';
 import '../../tokens/tipografia.dart';
 
@@ -91,7 +92,11 @@ class DsCardHospedagem extends StatelessWidget {
   Widget _buildDatas() {
     return Row(
       children: [
-        const Icon(Icons.calendar_today, size: 14, color: DsCores.cinza500),
+        const Icon(
+          Icons.calendar_today,
+          size: DsIcones.xs,
+          color: DsCores.cinza500,
+        ),
         const SizedBox(width: DsEspacamentos.xxs),
         Text(
           '${_formatarData(checkIn)} → ${_formatarData(checkOut)}',
@@ -104,7 +109,11 @@ class DsCardHospedagem extends StatelessWidget {
   Widget _buildImovel() {
     return Row(
       children: [
-        const Icon(Icons.home_outlined, size: 14, color: DsCores.cinza500),
+        const Icon(
+          Icons.home_outlined,
+          size: DsIcones.xs,
+          color: DsCores.cinza500,
+        ),
         const SizedBox(width: DsEspacamentos.xxs),
         Expanded(
           child: Text(
@@ -128,7 +137,7 @@ class DsCardHospedagem extends StatelessWidget {
         if (aoEditar != null)
           IconButton(
             onPressed: aoEditar,
-            icon: const Icon(Icons.edit_outlined, size: 20),
+            icon: const Icon(Icons.edit_outlined, size: DsIcones.lg),
             color: DsCores.cinza500,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -139,7 +148,7 @@ class DsCardHospedagem extends StatelessWidget {
         if (aoDeletar != null)
           IconButton(
             onPressed: aoDeletar,
-            icon: const Icon(Icons.delete_outline, size: 20),
+            icon: const Icon(Icons.delete_outline, size: DsIcones.lg),
             color: DsCores.erro,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../tokens/bordas.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/espacamentos.dart';
 import '../../tokens/tipografia.dart';
@@ -64,7 +65,10 @@ class DsTextField extends StatelessWidget {
           borderRadius: BorderRadius.all(
             Radius.circular(DsEspacamentos.radiusSm),
           ),
-          borderSide: BorderSide(color: DsCores.primaria, width: 2),
+          borderSide: BorderSide(
+            color: DsCores.primaria,
+            width: DsBordas.media,
+          ),
         ),
         errorBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(
@@ -76,7 +80,7 @@ class DsTextField extends StatelessWidget {
           borderRadius: BorderRadius.all(
             Radius.circular(DsEspacamentos.radiusSm),
           ),
-          borderSide: BorderSide(color: DsCores.erro, width: 2),
+          borderSide: BorderSide(color: DsCores.erro, width: DsBordas.media),
         ),
         disabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(
