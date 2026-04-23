@@ -228,7 +228,10 @@ class _FormularioHospedagemDialogState
         style: DsTipografia.titleMedium.copyWith(color: DsCores.cinza900),
       ),
       content: SizedBox(
-        width: 480,
+        width:
+            MediaQuery.of(context).size.width >= DsEspacamentos.breakpointTablet
+            ? 480
+            : MediaQuery.of(context).size.width - DsEspacamentos.md * 2,
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,

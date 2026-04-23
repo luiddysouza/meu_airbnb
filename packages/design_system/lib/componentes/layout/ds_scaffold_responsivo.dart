@@ -87,7 +87,16 @@ class _LayoutDesktop extends StatelessWidget {
               width: DsEspacamentos.larguraSidebar,
               child: ColoredBox(color: DsCores.branco, child: conteudoSidebar!),
             ),
-          Expanded(child: conteudoPrincipal),
+          Expanded(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: DsEspacamentos.maxWidthConteudo,
+                ),
+                child: conteudoPrincipal,
+              ),
+            ),
+          ),
         ],
       ),
     );
