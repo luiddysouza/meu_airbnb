@@ -191,3 +191,35 @@ App separado em `widgetbook/` usando o package `widgetbook`. Cada componente tem
 - (+) Organizado por categoria (botoes, cards, inputs, etc.)
 - (+) Diferencial técnico no portfólio
 - (-) App separado a manter (`pub get`, build separado)
+
+---
+
+## ADR-009: Infraestrutura pixel-perfect — auditoria e tokenização completa
+
+**Status**: Aceito
+
+**Contexto**  
+Apesar do sistema de tokens já cobrir cores, espaçamentos, tipografia e sombras, uma auditoria identificou que várias categorias de valores permaneciam hardcoded nos componentes: tamanhos de ícone (14, 16, 18, 20, 64px), espessuras de borda (1.5, 2.0px), alturas de botão (48px), dimensões de spinner (20×20px), durações de animação (3s, 4s) e a propriedade `height` (line-height) ausente em todos os 15 `TextStyle`. Além disso, a fonte Roboto era referenciada por nome sem bundle, e o dialog de formulário tinha largura fixa de 480px sem responsividade.
+
+**Decisão**  
+Realizar uma auditoria sistemática e corrigir todas as fragilidades em 7 commits atômicos:
+
+1. Adicionar `google_fonts` ao Design System e aplicar `GoogleFonts.robotoTextTheme()` no `DsTemaApp` para garantir Roboto em todas as plataformas.
+2. Criar tokens `DsIcones`, `DsBordas`, `DsAnimacoes` e expandir `DsEspacamentos` com `DsAlturas`.
+3. Adicionar `height` (line-height) em todos os 15 `TextStyle` de `DsTipografia`, seguindo spec Material Design 3.
+4–6. Migrar todos os componentes para os novos tokens (botões, cards, inputs, seletores, feedback).
+7. Tornar o `FormularioHospedagemDialog` responsivo e enforcar `maxWidthConteudo` no scaffold desktop.
+
+**Alternativas consideradas**
+- Corrigir caso a caso ao surgir — reactívo, mas permite que valores hardcoded se acumulem silenciosamente
+- Usar `lint` customizado para bloquear literais numéricos em widgets — complexidade de configuração desproporcionalmente alta
+- Bundlar fontes em `assets/fonts/` em vez de `google_fonts` — válido, mas `google_fonts` é mais simples para portfólio e permite atualizações automáticas
+
+**Consequências**
+- (+) Qualquer valor visível na tela tem origem rastreable em um token — mudar um token propaga para todos os componentes
+- (+) Line-heights explícitos fazem a altura de blocos de texto bater com frames do Figma
+- (+) Fonte Roboto garantida cross-platform (não depende de fonte do sistema)
+- (+) Dialog responsivo funciona corretamente em mobile sem layout quebrado
+- (+) Conteúdo desktop respeitado até 1440px de largura máxima
+- (+) Checklist de novo componente atualizado: proíbe literais numéricos
+- (-) Dependência de rede para `google_fonts` no primeiro carregamento (offline: fonte de sistema como fallback)

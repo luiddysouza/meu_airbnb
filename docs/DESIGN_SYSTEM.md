@@ -39,11 +39,14 @@ No `meu_airbnb`, o `ThemeData` é montado **a partir dos tokens** (em `tema_app.
 ### Categorias de tokens neste projeto
 
 | Categoria | Classe | O que define | Exemplo |
-|---|---|---|---|
+|---|---|---|---------|
 | **Cores** | `DsCores` | Paleta completa: primária, secundária, neutras, semânticas, status | `DsCores.primaria`, `DsCores.erro` |
-| **Tipografia** | `DsTipografia` | Escala tipográfica M3 (display → label) | `DsTipografia.titleMedium`, `DsTipografia.bodySmall` |
-| **Espaçamentos** | `DsEspacamentos` | Escala de espaçamento (múltiplos de 4), breakpoints, border radius | `DsEspacamentos.md` (16), `DsEspacamentos.radiusSm` (8) |
+| **Tipografia** | `DsTipografia` | Escala tipográfica M3 (display → label) com `fontSize`, `fontWeight`, `letterSpacing` e `height` (line-height) | `DsTipografia.titleMedium`, `DsTipografia.bodySmall` |
+| **Espaçamentos e Alturas** | `DsEspacamentos`, `DsAlturas` | Escala de espaçamento (múltiplos de 4), breakpoints, border radius, alturas de componentes | `DsEspacamentos.md` (16), `DsAlturas.botaoPadrao` (48) |
 | **Sombras** | `DsSombras` | Níveis de elevação como `List<BoxShadow>` | `DsSombras.nivel1`, `DsSombras.nivel2` |
+| **Ícones** | `DsIcones` | Escala de tamanhos de ícones (xs → xl) | `DsIcones.md` (18), `DsIcones.xl` (64) |
+| **Bordas** | `DsBordas` | Espessuras de borda e stroke de progress indicator | `DsBordas.fina` (1.5), `DsBordas.media` (2.0) |
+| **Animações** | `DsAnimacoes` | Durações padrão de animações de UI | `DsAnimacoes.snackbarCurta` (3s), `DsAnimacoes.snackbarLonga` (4s) |
 
 ### Anatomia de um arquivo de token
 
@@ -74,6 +77,20 @@ xxs = 4 | xs = 8 | sm = 12 | md = 16 | lg = 24 | xl = 32 | xxl = 48 | xxxl = 64
 
 A ideia é que todos os espaçamentos são múltiplos de 4 (com exceção de `sm = 12`, que é 3×4 para cobrir o meio-termo). Isso garante alinhamento visual consistente em qualquer combinação de paddings e margins.
 
+### Line-height na escala tipográfica
+
+Todos os 15 `TextStyle` em `DsTipografia` incluem a propriedade `height` (multiplicador de line-height = lineHeight ÷ fontSize), seguindo a especificação do **Material Design 3**:
+
+| Categoria | Exemplo | fontSize | lineHeight | height |
+|---|---|---|---|---|
+| Display | `displayLarge` | 57px | 64px | 1.12 |
+| Headline | `headlineLarge` | 32px | 40px | 1.25 |
+| Title | `titleMedium` | 16px | 24px | 1.50 |
+| Body | `bodyMedium` | 14px | 20px | 1.43 |
+| Label | `labelSmall` | 11px | 16px | 1.45 |
+
+Isso é essencial para pixel-perfect: Figma sempre especifica line-height, e sem a propriedade `height` no Flutter a altura dos blocos de texto não bate com os frames do Figma.
+
 ---
 
 ## Componentes: peças montadas com tokens
@@ -82,7 +99,7 @@ A ideia é que todos os espaçamentos são múltiplos de 4 (com exceção de `sm
 
 1. **Prefixo `Ds`** — Todo componente público do Design System começa com `Ds` (ex: `DsBotaoPrimario`, `DsCardHospedagem`). Isso evita colisão com widgets do Flutter (`TextField` vs `DsTextField`) e deixa claro que o componente pertence ao Design System.
 
-2. **Nenhum valor hardcoded** — Componentes nunca usam `Color(0xFF...)`, `16.0` ou `'Roboto'` diretamente. Sempre referenciam tokens: `DsCores.primaria`, `DsEspacamentos.md`, `DsTipografia.labelLarge`.
+2. **Nenhum valor hardcoded** — Componentes nunca usam `Color(0xFF...)`, `16.0` ou `'Roboto'` diretamente. Sempre referenciam tokens: `DsCores.primaria`, `DsEspacamentos.md`, `DsTipografia.labelLarge`, `DsIcones.md`, `DsBordas.fina`, `DsAnimacoes.snackbarCurta`.
 
 3. **Construtor `const`** — Sempre que possível, construtores são `const` para permitir otimização em árvores de widgets.
 
@@ -158,30 +175,31 @@ class DsBotaoPrimario extends StatelessWidget {
     return ElevatedButton(
       onPressed: carregando ? null : aoTocar,
       style: ElevatedButton.styleFrom(
-        backgroundColor: DsCores.primaria,        // ← token de cor
-        foregroundColor: DsCores.branco,           // ← token de cor
+        backgroundColor: DsCores.primaria,              // ← token de cor
+        foregroundColor: DsCores.branco,                // ← token de cor
         padding: const EdgeInsets.symmetric(
-          horizontal: DsEspacamentos.lg,           // ← token de espaçamento
-          vertical: DsEspacamentos.md,             // ← token de espaçamento
+          horizontal: DsEspacamentos.lg,               // ← token de espaçamento
+          vertical: DsEspacamentos.md,                 // ← token de espaçamento
         ),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
-            Radius.circular(DsEspacamentos.radiusMd), // ← token de radius
+            Radius.circular(DsEspacamentos.radiusMd),  // ← token de radius
           ),
         ),
-        textStyle: DsTipografia.labelLarge,        // ← token de tipografia
+        textStyle: DsTipografia.labelLarge,            // ← token de tipografia
+        minimumSize: const Size(0, DsAlturas.botaoPadrao), // ← token de altura
       ),
-      child: _buildFilho(), // lógica condicional extraída
+      child: _buildFilho(),
     );
   }
 
   // 5. Métodos privados — renderização condicional
   Widget _buildFilho() {
     if (carregando) {
-      return const SizedBox(
-        height: 20, width: 20,
+      return const SizedBox.square(
+        dimension: DsAlturas.spinnerBotao,              // ← token de altura
         child: CircularProgressIndicator(
-          strokeWidth: 2,
+          strokeWidth: DsBordas.progressIndicator,      // ← token de borda
           valueColor: AlwaysStoppedAnimation<Color>(DsCores.branco),
         ),
       );
@@ -190,7 +208,7 @@ class DsBotaoPrimario extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icone, size: 18),
+          Icon(icone, size: DsIcones.md),               // ← token de ícone
           const SizedBox(width: DsEspacamentos.xs),
           Text(rotulo),
         ],
@@ -345,11 +363,60 @@ cd packages/design_system && dart analyze && flutter test
 ### Checklist para cada novo componente
 
 - [ ] Widget criado em `componentes/<categoria>/ds_<nome>.dart`
-- [ ] Usa **apenas tokens** (nunca valores hardcoded)
+- [ ] Usa **apenas tokens** (nunca valores hardcoded — nem `size: 18`, `width: 2`, `Duration(seconds: 3)`, `height: 48`)
 - [ ] Prefixo `Ds` no nome da classe
 - [ ] Construtor `const` quando possível
 - [ ] Parâmetros nomeados em português
 - [ ] Export adicionado no barrel `design_system.dart`
+
+---
+
+## Pixel-Perfect e integração com Figma
+
+### O que é pixel-perfect?
+
+Pixel-perfect significa que o layout implementado em código reproduz exatamente o que foi desenhado no Figma: mesmos espaçamentos, alturas, tamanhos de fonte, line-heights, espessuras de borda e comportamento responsivo. Para isso ser possível, **cada valor visível na tela deve vir de um token** — não de um literal número escondido dentro de um widget.
+
+### Auditoria realizada
+
+O projeto passou por uma auditoria completa de pixel-perfect. Os problemas encontrados e corrigidos foram organizados em 7 commits:
+
+| Commit | O que foi feito |
+|---|---|
+| `chore(ds): google_fonts e Roboto via tema` | `fontFamily: 'Roboto'` existia no código mas sem bundle. Adicionado `google_fonts` ao DS e `GoogleFonts.robotoTextTheme()` no `DsTemaApp`. Em iOS e Web sem CDN, sem isso a fonte cai para o sistema operacional (SF Pro, system-ui), quebrando qualquer comparação com Figma. |
+| `feat(ds/tokens): tokens de ícone, borda, altura e animação` | Criados `DsIcones`, `DsBordas`, `DsAnimacoes` e `DsAlturas` para cobrir as é categorias que faltavam. Antes, valores como `size: 14`, `width: 1.5`, `height: 20` e `Duration(seconds: 3)` estavam espalhados em 13+ locais. |
+| `feat(ds/tokens): line-height na escala tipográfica` | Adicionada a propriedade `height` em todos os 15 `TextStyle`. Sem line-height, a altura de blocos de texto no Flutter não bate com os frames do Figma. |
+| `refactor(ds/botoes): hardcoded → tokens` | `DsBotaoPrimario`, `DsBotaoSecundario` e `DsBotaoIcone` migrados. Altura 48, spinner 20×20, strokeWidth 2 e icon 18 agora vêm de tokens. |
+| `refactor(ds/cards-inputs-seletores): hardcoded → tokens` | `DsCardHospedagem`, `DsTextField`, `DsDropdown` e `DsDateRangePicker` migrados. |
+| `refactor(ds/feedback): hardcoded → tokens` | `DsEstadoVazio` (icon 64) e `DsSnackbar` (icon 20, durações) migrados. |
+| `fix(app): dialog responsivo + maxWidthConteudo no scaffold` | `FormularioHospedagemDialog` tinha `width: 480` fixo — agora é responsivo (480px em desktop, largura da tela − padding em mobile). `DsScaffoldResponsivo` passou a enforcar `DsEspacamentos.maxWidthConteudo` (1440px) em telas ultra-wide. |
+
+### Regra pós-auditoria
+
+Todo valor novo deve vir de um token existente. Se não houver token adequado, **crie um token antes de criar o componente**. Nunca introduza um literal numérico diretamente em um widget.
+
+```dart
+// ❌ Errado
+Icon(Icons.edit, size: 20)
+SizedBox(height: 48)
+BorderSide(width: 1.5)
+Duration(seconds: 3)
+
+// ✅ Correto
+Icon(Icons.edit, size: DsIcones.lg)
+SizedBox(height: DsAlturas.botaoPadrao)
+BorderSide(width: DsBordas.fina)
+DsAnimacoes.snackbarCurta
+```
+
+### Como importar um Figma
+
+Com o sistema de tokens completo, o fluxo de importação de um Figma é:
+
+1. **Mapeie os valores do Figma para tokens existentes.** Ex: o Figma usa `line-height: 24` para textos de `16px` → `DsTipografia.bodyLarge` já tem `height: 1.50`.
+2. **Para valores não cobertos, atualize o token.** Ex: se o Figma usa `line-height: 22` para `bodyLarge`, atualize `height` em `DsTipografia.bodyLarge` — todos os componentes que o usam são atualizados automaticamente.
+3. **Verifique breakpoints.** `DsEspacamentos.breakpointTablet = 900` e `breakpointMobile = 600` devem corresponder aos breakpoints definidos no Figma.
+4. **Valide no Widgetbook.** Cada componente tem entrada no Widgetbook — use-o para comparar visualmente com os frames do Figma antes de integrar nas telas.
 - [ ] Teste unitário com padrão AAA (Arrange / Act / Assert)
 - [ ] Entrada no Widgetbook com pelo menos 2 use cases
 - [ ] `dart analyze` sem issues
