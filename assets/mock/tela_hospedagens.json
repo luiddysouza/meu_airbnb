@@ -15,7 +15,7 @@
         {
             "tipo": "dropdown",
             "propriedades": {
-                "rotulo": "Imóvel",
+                "rotulo": "Selecione o imóvel",
                 "opcoes_source": "imoveis"
             },
             "acao": {

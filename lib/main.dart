@@ -1,5 +1,6 @@
 ﻿import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/di/injecao.dart';
 import 'core/roteamento/rotas.dart';
@@ -20,6 +21,9 @@ class MeuAirbnbApp extends StatelessWidget {
       theme: DsTemaApp.tema,
       routerConfig: roteador,
       debugShowCheckedModeBanner: false,
+      locale: const Locale('pt', 'BR'),
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: const [Locale('pt', 'BR')],
     );
   }
 }

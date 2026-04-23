@@ -40,9 +40,15 @@ class DsDateRangePicker extends StatelessWidget {
       initialDateRange: periodoSelecionado,
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: Theme.of(
-            context,
-          ).colorScheme.copyWith(primary: DsCores.primaria),
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+            primary: DsCores.branco,
+            surface: DsCores.branco,
+            surfaceContainerHigh: DsCores.branco,
+            surfaceContainerHighest: DsCores.branco,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(foregroundColor: DsCores.cinza900),
+          ),
         ),
         child: child!,
       ),

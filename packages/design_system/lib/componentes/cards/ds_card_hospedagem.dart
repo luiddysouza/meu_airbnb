@@ -52,7 +52,7 @@ class DsCardHospedagem extends StatelessWidget {
           borderRadius: const BorderRadius.all(
             Radius.circular(DsEspacamentos.radiusMd),
           ),
-          boxShadow: DsSombras.nivel1,
+          boxShadow: DsSombras.nivel3,
         ),
         padding: const EdgeInsets.all(DsEspacamentos.md),
         child: Column(

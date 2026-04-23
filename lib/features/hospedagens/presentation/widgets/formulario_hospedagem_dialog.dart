@@ -345,7 +345,7 @@ class _FormularioHospedagemDialogState
                 if (widget.imoveis.isNotEmpty) ...[
                   const SizedBox(height: DsEspacamentos.md),
                   DsDropdown(
-                    rotulo: 'Imóvel',
+                    rotulo: 'Selecione o imóvel',
                     opcoes: widget.imoveis
                         .map(
                           (i) => DsOpcaoDropdown(valor: i.id, rotulo: i.nome),

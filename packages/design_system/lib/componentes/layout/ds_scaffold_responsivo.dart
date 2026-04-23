@@ -76,7 +76,7 @@ class _LayoutDesktop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DsCores.cinza100,
+      backgroundColor: DsCores.branco,
       appBar: DsAppBarAdaptativa(titulo: titulo, acoes: acoes),
       floatingActionButton: botaoAcaoFlutuante,
       body: Row(
@@ -88,12 +88,17 @@ class _LayoutDesktop extends StatelessWidget {
               child: ColoredBox(color: DsCores.branco, child: conteudoSidebar!),
             ),
           Expanded(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: DsEspacamentos.maxWidthConteudo,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                bottom: botaoAcaoFlutuante != null ? 72 : 0,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: DsEspacamentos.maxWidthConteudo,
+                  ),
+                  child: conteudoPrincipal,
                 ),
-                child: conteudoPrincipal,
               ),
             ),
           ),
@@ -123,11 +128,12 @@ class _LayoutMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DsCores.cinza100,
+      backgroundColor: DsCores.branco,
       appBar: DsAppBarAdaptativa(titulo: titulo, acoes: acoes),
       drawer: drawer,
       floatingActionButton: botaoAcaoFlutuante,
       body: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: botaoAcaoFlutuante != null ? 72 : 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
