@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/cores.dart';
 import '../../tokens/espacamentos.dart';
+import '../../tokens/icones.dart';
 import '../../tokens/tipografia.dart';
 
 class DsEstadoVazio extends StatelessWidget {
@@ -26,7 +27,7 @@ class DsEstadoVazio extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icone, size: 64, color: DsCores.cinza300),
+            Icon(icone, size: DsIcones.xl, color: DsCores.cinza300),
             const SizedBox(height: DsEspacamentos.md),
             Text(
               mensagem,

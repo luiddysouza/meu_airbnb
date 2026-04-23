@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../tokens/animacoes.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/espacamentos.dart';
+import '../../tokens/icones.dart';
 import '../../tokens/tipografia.dart';
 
 abstract final class DsSnackbar {
   static void sucesso(
     BuildContext context, {
     required String mensagem,
-    Duration duracao = const Duration(seconds: 3),
+    Duration duracao = DsAnimacoes.snackbarCurta,
   }) {
     _mostrar(
       context,
@@ -22,7 +24,7 @@ abstract final class DsSnackbar {
   static void erro(
     BuildContext context, {
     required String mensagem,
-    Duration duracao = const Duration(seconds: 4),
+    Duration duracao = DsAnimacoes.snackbarLonga,
   }) {
     _mostrar(
       context,
@@ -36,7 +38,7 @@ abstract final class DsSnackbar {
   static void info(
     BuildContext context, {
     required String mensagem,
-    Duration duracao = const Duration(seconds: 3),
+    Duration duracao = DsAnimacoes.snackbarCurta,
   }) {
     _mostrar(
       context,
@@ -68,7 +70,7 @@ abstract final class DsSnackbar {
           ),
           content: Row(
             children: [
-              Icon(icone, color: DsCores.branco, size: 20),
+              Icon(icone, color: DsCores.branco, size: DsIcones.lg),
               const SizedBox(width: DsEspacamentos.sm),
               Expanded(
                 child: Text(
