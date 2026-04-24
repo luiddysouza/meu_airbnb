@@ -49,10 +49,8 @@ class FormularioHospedagemDialog extends StatefulWidget {
   }) async {
     final resultado = await showDialog<bool>(
       context: context,
-      builder: (_) => FormularioHospedagemDialog(
-        imoveis: imoveis,
-        hospedagem: hospedagem,
-      ),
+      builder: (_) =>
+          FormularioHospedagemDialog(imoveis: imoveis, hospedagem: hospedagem),
     );
     return resultado ?? false;
   }
@@ -132,7 +130,8 @@ class _FormularioHospedagemDialogState
     final inicio = _formStore.formState.checkIn ?? DateTime.now();
     final data = await showDatePicker(
       context: context,
-      initialDate: (_formStore.formState.checkOut != null &&
+      initialDate:
+          (_formStore.formState.checkOut != null &&
               _formStore.formState.checkOut!.isAfter(inicio))
           ? _formStore.formState.checkOut!
           : inicio,
@@ -209,8 +208,7 @@ class _FormularioHospedagemDialogState
                     DsTextField(
                       rotulo: 'Nome do hóspede',
                       controlador: _nomeHospedeCtrl,
-                      validador: (v) =>
-                          state.erros['nomeHospede'],
+                      validador: (v) => state.erros['nomeHospede'],
                     ),
                     const SizedBox(height: DsEspacamentos.md),
 
@@ -250,8 +248,7 @@ class _FormularioHospedagemDialogState
                             rotulo: 'Hóspedes',
                             controlador: _numHospedesCtrl,
                             tipoTeclado: TextInputType.number,
-                            validador: (v) =>
-                                state.erros['numHospedes'],
+                            validador: (v) => state.erros['numHospedes'],
                           ),
                         ),
                         const SizedBox(width: DsEspacamentos.sm),
@@ -262,8 +259,7 @@ class _FormularioHospedagemDialogState
                             tipoTeclado: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            validador: (v) =>
-                                state.erros['valorTotal'],
+                            validador: (v) => state.erros['valorTotal'],
                           ),
                         ),
                       ],
@@ -294,10 +290,8 @@ class _FormularioHospedagemDialogState
                         rotulo: 'Selecione o imóvel',
                         opcoes: widget.imoveis
                             .map(
-                              (i) => DsOpcaoDropdown(
-                                valor: i.id,
-                                rotulo: i.nome,
-                              ),
+                              (i) =>
+                                  DsOpcaoDropdown(valor: i.id, rotulo: i.nome),
                             )
                             .toList(),
                         valorSelecionado: state.imovelId,
