@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
@@ -90,19 +89,19 @@ final imagensFolder = WidgetbookFolder(
               padding: const EdgeInsets.all(16),
               child: DsImagemBase64(
                 base64: base64,
-                altura: context.knobs.double(
+                altura: context.knobs.double.slider(
                   label: 'Altura',
                   initialValue: 150,
                   min: 50,
                   max: 300,
                 ),
-                largura: context.knobs.double(
+                largura: context.knobs.double.slider(
                   label: 'Largura',
                   initialValue: 150,
                   min: 50,
                   max: 300,
                 ),
-                borderRadius: context.knobs.double(
+                borderRadius: context.knobs.double.slider(
                   label: 'Border Radius',
                   initialValue: 8,
                   min: 0,

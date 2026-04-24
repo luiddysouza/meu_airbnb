@@ -102,11 +102,9 @@ class _DsCompartilharHospedagemButtonState
 
     final checkIn = widget.hospedagem.checkIn;
     final checkOut = widget.hospedagem.checkOut;
-    if (checkIn != null && checkOut != null) {
-      final checkInFormatado = _formatarData(checkIn);
-      final checkOutFormatado = _formatarData(checkOut);
-      linhas.add('Período: $checkInFormatado até $checkOutFormatado');
-    }
+    final checkInFormatado = _formatarData(checkIn);
+    final checkOutFormatado = _formatarData(checkOut);
+    linhas.add('Período: $checkInFormatado até $checkOutFormatado');
 
     linhas.add('Valor: R\$ ${widget.hospedagem.valorTotal.toStringAsFixed(2)}');
     linhas.add('Status: ${widget.hospedagem.status}');

@@ -1,12 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart' as mi;
-
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_form_state.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_form_store.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart' as mi;
 
 import 'hospedagem_form_store_test.mocks.dart';
 
@@ -23,7 +22,7 @@ void main() {
   group('HospedagemFormStore — iniciarNovoFormulario()', () {
     test('reseta formState para o padrão', () {
       // Arrange — modificar state
-      formStore.formState = HospedagemFormState(
+      formStore.formState = const HospedagemFormState(
         nomeHospede: 'João Silva',
         status: 'confirmada',
       );
@@ -361,7 +360,7 @@ void main() {
       // Arrange
       const base64 =
           'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-      formStore.formState = HospedagemFormState(fotoBase64: base64);
+      formStore.formState = const HospedagemFormState(fotoBase64: base64);
 
       // Act
       formStore.removerFoto();
@@ -569,10 +568,10 @@ void main() {
   group('HospedagemFormStore — limpar()', () {
     test('reseta formState para padrão', () {
       // Arrange
-      formStore.formState = HospedagemFormState(
+      formStore.formState = const HospedagemFormState(
         nomeHospede: 'João Silva',
         status: 'confirmada',
-        erros: const {'submit': 'Erro'},
+        erros: {'submit': 'Erro'},
       );
 
       // Act

@@ -254,7 +254,7 @@ void main() {
 
     test('múltiplos erros de validação são coletados', () {
       // Arrange
-      final state = HospedagemFormState(
+      const state = HospedagemFormState(
         nomeHospede: '',
         numHospedes: 'abc',
         valorTotal: 'xyz',
@@ -521,7 +521,7 @@ void main() {
   group('HospedagemFormState — copyWith()', () {
     test('preserva imutabilidade criando nova instância', () {
       // Arrange
-      final original = HospedagemFormState(
+      const original = HospedagemFormState(
         nomeHospede: 'João Silva',
         numHospedes: '2',
         valorTotal: '1000.00',
@@ -557,7 +557,7 @@ void main() {
 
     test('copyWith com null mantém valor anterior (null coalescing)', () {
       // Arrange
-      final original = HospedagemFormState(
+      const original = HospedagemFormState(
         nomeHospede: 'João Silva',
         notas: 'Alguma nota',
         imovelId: 'imovel-1',
@@ -574,7 +574,7 @@ void main() {
 
     test('copyWith com múltiplos campos', () {
       // Arrange
-      final original = const HospedagemFormState();
+      const original = HospedagemFormState();
 
       // Act
       final copia = original.copyWith(
@@ -624,8 +624,8 @@ void main() {
 
     test('dois states com valores diferentes não são iguais', () {
       // Arrange
-      final state1 = HospedagemFormState(nomeHospede: 'João Silva');
-      final state2 = HospedagemFormState(nomeHospede: 'Maria Santos');
+      const state1 = HospedagemFormState(nomeHospede: 'João Silva');
+      const state2 = HospedagemFormState(nomeHospede: 'Maria Santos');
 
       // Act & Assert
       expect(state1, isNot(equals(state2)));
