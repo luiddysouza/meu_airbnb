@@ -9,6 +9,7 @@ import '../../features/hospedagens/domain/usecases/atualizar_hospedagem.dart';
 import '../../features/hospedagens/domain/usecases/deletar_hospedagem.dart';
 import '../../features/hospedagens/domain/usecases/obter_hospedagens.dart';
 import '../../features/hospedagens/domain/usecases/obter_imoveis.dart';
+import '../../features/hospedagens/presentation/stores/conectividade_store.dart';
 import '../../features/hospedagens/presentation/stores/filtro_store.dart';
 import '../../features/hospedagens/presentation/stores/hospedagem_form_store.dart';
 import '../../features/hospedagens/presentation/stores/hospedagem_store.dart';
@@ -67,6 +68,11 @@ Future<void> inicializarDependencias() async {
   // ── 5. Auth Store ───────────────────────────────────────────────────────────
   sl.registerSingleton<AuthStore>(AuthStore());
 
-  // ── 6. SduiCubit ───────────────────────────────────────────────────────────
+  // ── 6. Conectividade Store ──────────────────────────────────────────────────
+  final conectividadeStore = ConectividadeStore();
+  conectividadeStore.iniciar(); // Começa a escutar eventos imediatamente
+  sl.registerSingleton<ConectividadeStore>(conectividadeStore);
+
+  // ── 7. SduiCubit ───────────────────────────────────────────────────────────
   sl.registerFactory<SduiCubit>(() => SduiCubit());
 }
