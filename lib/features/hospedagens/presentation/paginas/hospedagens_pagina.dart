@@ -115,7 +115,6 @@ class _HospedagensPaginaState extends State<HospedagensPagina> {
 
     final salvo = await FormularioHospedagemDialog.mostrar(
       context,
-      hospedagemStore: hospedagemStore,
       imoveis: filtroStore.imoveis,
     );
 

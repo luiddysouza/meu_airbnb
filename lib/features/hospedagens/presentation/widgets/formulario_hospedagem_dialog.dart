@@ -1,38 +1,39 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
-import '../../domain/entities/enums.dart';
+import '../../../../core/di/injecao.dart';
 import '../../domain/entities/hospedagem_entity.dart';
 import '../../domain/entities/imovel_entity.dart';
-import '../stores/hospedagem_store.dart';
+import '../stores/hospedagem_form_store.dart';
 
 /// Dialog com formulário para criar ou editar uma [HospedagemEntity].
 ///
-/// Exibe os campos em um [AlertDialog] com scroll. O botão "Salvar" chama
-/// a action correspondente do [HospedagemStore] e permanece em estado de
-/// carregamento enquanto o use case executa. Em caso de sucesso, fecha o
-/// dialog retornando `true`. Em caso de falha, exibe a mensagem de erro
-/// sem fechar.
+/// Shell fino que exibe os campos em um [AlertDialog] com scroll.
+/// Toda a lógica de estado é delegada a [HospedagemFormStore] via MobX.
+/// O dialog é meramente um renderizador que reflete as mudanças do store em tempo real.
 ///
-/// Uso:
+/// ## Padrão: Blueprint/Ser Humano
+/// O formulário segue o padrão imutável onde:
+/// - [HospedagemFormState] = blueprint em construção (pode ser incompleto)
+/// - [HospedagemEntity] = ser humano completo e válido (pronto para persistência)
+/// - [HospedagemFormStore] = engenheiro que orquestra as transições
+///
+/// ## Uso:
 /// ```dart
 /// final salvo = await FormularioHospedagemDialog.mostrar(
 ///   context,
-///   hospedagemStore: store,
 ///   imoveis: filtroStore.imoveis,
+///   hospedagem: hospedagemExistente, // opcional
 /// );
-/// if (salvo) DsSnackbar.sucesso(context, mensagem: 'Hospedagem criada!');
+/// if (salvo) DsSnackbar.sucesso(context, mensagem: 'Hospedagem salva!');
 /// ```
 class FormularioHospedagemDialog extends StatefulWidget {
   const FormularioHospedagemDialog({
     super.key,
-    required this.hospedagemStore,
     required this.imoveis,
     this.hospedagem,
   });
-
-  /// Store que executa as actions de CRUD.
-  final HospedagemStore hospedagemStore;
 
   /// Lista de imóveis disponíveis para o dropdown.
   final List<ImovelEntity> imoveis;
@@ -43,14 +44,12 @@ class FormularioHospedagemDialog extends StatefulWidget {
   /// Abre o dialog e retorna `true` se o formulário foi salvo com sucesso.
   static Future<bool> mostrar(
     BuildContext context, {
-    required HospedagemStore hospedagemStore,
     required List<ImovelEntity> imoveis,
     HospedagemEntity? hospedagem,
   }) async {
     final resultado = await showDialog<bool>(
       context: context,
       builder: (_) => FormularioHospedagemDialog(
-        hospedagemStore: hospedagemStore,
         imoveis: imoveis,
         hospedagem: hospedagem,
       ),
@@ -67,43 +66,43 @@ class _FormularioHospedagemDialogState
     extends State<FormularioHospedagemDialog> {
   final _formKey = GlobalKey<FormState>();
 
+  // ── TextEditingControllers — Artefatos puros de UI ──────────────────────────
+  // Mantemos aqui apenas porque o Flutter usa para sincronizar com DsTextField.
+  // O estado real vive no HospedagemFormStore.formState.
+
   late final TextEditingController _nomeHospedeCtrl;
   late final TextEditingController _numHospedesCtrl;
   late final TextEditingController _valorTotalCtrl;
   late final TextEditingController _notasCtrl;
 
-  DateTime? _checkIn;
-  DateTime? _checkOut;
-  StatusHospedagem? _status;
-  Plataforma? _plataforma;
-  String? _imovelId;
-
-  bool _salvando = false;
-  String? _erroFormulario;
+  // ── Store MobX ─────────────────────────────────────────────────────────────
+  late final HospedagemFormStore _formStore;
 
   bool get _edicao => widget.hospedagem != null;
 
   @override
   void initState() {
     super.initState();
-    final h = widget.hospedagem;
-    _nomeHospedeCtrl = TextEditingController(text: h?.nomeHospede ?? '');
-    _numHospedesCtrl = TextEditingController(
-      text: h?.numHospedes.toString() ?? '',
-    );
-    _valorTotalCtrl = TextEditingController(
-      text: h != null ? h.valorTotal.toStringAsFixed(2) : '',
-    );
-    _notasCtrl = TextEditingController(text: h?.notas ?? '');
-    _checkIn = h?.checkIn;
-    _checkOut = h?.checkOut;
-    _status = h?.status;
-    _plataforma = h?.plataforma;
-    _imovelId = (h != null && h.imovelId.isNotEmpty) ? h.imovelId : null;
 
-    // Garante que o imovelId existe na lista; se não, ignora.
-    if (_imovelId != null && !widget.imoveis.any((i) => i.id == _imovelId)) {
-      _imovelId = null;
+    // Obter instância do store via get_it (registrado como Factory)
+    _formStore = sl<HospedagemFormStore>();
+
+    // Inicializar controllers vazios (sincronização em tempo real via Observer)
+    _nomeHospedeCtrl = TextEditingController();
+    _numHospedesCtrl = TextEditingController();
+    _valorTotalCtrl = TextEditingController();
+    _notasCtrl = TextEditingController();
+
+    // Configurar o estado inicial do formulário
+    if (_edicao) {
+      _formStore.carregarParaEdicao(widget.hospedagem!);
+      // Sincronizar controllers com dados carregados
+      _nomeHospedeCtrl.text = _formStore.formState.nomeHospede;
+      _numHospedesCtrl.text = _formStore.formState.numHospedes;
+      _valorTotalCtrl.text = _formStore.formState.valorTotal;
+      _notasCtrl.text = _formStore.formState.notas ?? '';
+    } else {
+      _formStore.iniciarNovoFormulario();
     }
   }
 
@@ -119,91 +118,42 @@ class _FormularioHospedagemDialogState
   Future<void> _selecionarCheckIn() async {
     final data = await showDatePicker(
       context: context,
-      initialDate: _checkIn ?? DateTime.now(),
+      initialDate: _formStore.formState.checkIn ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
       helpText: 'Check-in',
     );
     if (data != null) {
-      setState(() {
-        _checkIn = data;
-        // Garante que checkOut não fique antes de checkIn.
-        if (_checkOut != null && _checkOut!.isBefore(data)) {
-          _checkOut = data.add(const Duration(days: 1));
-        }
-      });
+      _formStore.atualizarCheckIn(data);
     }
   }
 
   Future<void> _selecionarCheckOut() async {
-    final inicio = _checkIn ?? DateTime.now();
+    final inicio = _formStore.formState.checkIn ?? DateTime.now();
     final data = await showDatePicker(
       context: context,
-      initialDate: (_checkOut != null && _checkOut!.isAfter(inicio))
-          ? _checkOut!
+      initialDate: (_formStore.formState.checkOut != null &&
+              _formStore.formState.checkOut!.isAfter(inicio))
+          ? _formStore.formState.checkOut!
           : inicio,
       firstDate: inicio,
       lastDate: DateTime(2030),
       helpText: 'Check-out',
     );
     if (data != null) {
-      setState(() => _checkOut = data);
+      _formStore.atualizarCheckOut(data);
     }
   }
 
   Future<void> _salvar() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_checkIn == null || _checkOut == null) {
-      setState(
-        () => _erroFormulario = 'Selecione as datas de check-in e check-out',
-      );
-      return;
-    }
-    if (_status == null || _plataforma == null) {
-      setState(() => _erroFormulario = 'Selecione o status e a plataforma');
-      return;
-    }
-    if (widget.imoveis.isNotEmpty && _imovelId == null) {
-      setState(() => _erroFormulario = 'Selecione o imóvel');
-      return;
-    }
+    // Salvar com ID se for edição, sem ID se for criação
+    await _formStore.salvar(idExistente: widget.hospedagem?.id);
 
-    setState(() {
-      _salvando = true;
-      _erroFormulario = null;
-    });
-
-    final hospedagem = HospedagemEntity(
-      id: widget.hospedagem?.id ?? '',
-      nomeHospede: _nomeHospedeCtrl.text.trim(),
-      checkIn: _checkIn!,
-      checkOut: _checkOut!,
-      numHospedes: int.tryParse(_numHospedesCtrl.text) ?? 1,
-      valorTotal:
-          double.tryParse(_valorTotalCtrl.text.replaceAll(',', '.')) ?? 0.0,
-      status: _status!,
-      plataforma: _plataforma!,
-      imovelId: _imovelId ?? '',
-      notas: _notasCtrl.text.trim().isEmpty ? null : _notasCtrl.text.trim(),
-      criadoEm: widget.hospedagem?.criadoEm ?? DateTime.now(),
-    );
-
-    if (_edicao) {
-      await widget.hospedagemStore.atualizarHospedagem(hospedagem);
-    } else {
-      await widget.hospedagemStore.adicionarHospedagem(hospedagem);
-    }
-
+    // Verificar se salvou com sucesso (sem erro de submit)
     if (!mounted) return;
-
-    final erro = widget.hospedagemStore.erro;
-    if (erro != null) {
-      setState(() {
-        _salvando = false;
-        _erroFormulario = erro;
-      });
-    } else {
+    if (_formStore.erroSubmit == null && _formStore.formularioValido) {
       Navigator.of(context).pop(true);
     }
   }
@@ -232,163 +182,169 @@ class _FormularioHospedagemDialogState
             MediaQuery.of(context).size.width >= DsEspacamentos.breakpointTablet
             ? 480
             : MediaQuery.of(context).size.width - DsEspacamentos.md * 2,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_erroFormulario != null) ...[
-                  _ErroFormulario(mensagem: _erroFormulario!),
-                  const SizedBox(height: DsEspacamentos.md),
-                ],
-                DsTextField(
-                  rotulo: 'Nome do hóspede',
-                  controlador: _nomeHospedeCtrl,
-                  validador: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Informe o nome do hóspede'
-                      : null,
-                ),
-                const SizedBox(height: DsEspacamentos.md),
-                Row(
+        child: Observer(
+          builder: (_) {
+            final state = _formStore.formState;
+
+            // Sincronizar controllers com o state (sem disparar listeners)
+            _nomeHospedeCtrl.text = state.nomeHospede;
+            _numHospedesCtrl.text = state.numHospedes;
+            _valorTotalCtrl.text = state.valorTotal;
+            _notasCtrl.text = state.notas ?? '';
+
+            return SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: _CampoData(
-                        rotulo: 'Check-in',
-                        valor: _checkIn != null
-                            ? _formatarData(_checkIn!)
-                            : '—',
-                        aoTocar: _selecionarCheckIn,
-                      ),
+                    // ── Erro de submit (se houver) ────────────────────────────
+                    if (state.erros['submit'] != null) ...[
+                      _ErroFormulario(mensagem: state.erros['submit']!),
+                      const SizedBox(height: DsEspacamentos.md),
+                    ],
+
+                    // ── Nome do hóspede ────────────────────────────────────────
+                    DsTextField(
+                      rotulo: 'Nome do hóspede',
+                      controlador: _nomeHospedeCtrl,
+                      validador: (v) =>
+                          state.erros['nomeHospede'],
                     ),
-                    const SizedBox(width: DsEspacamentos.sm),
-                    Expanded(
-                      child: _CampoData(
-                        rotulo: 'Check-out',
-                        valor: _checkOut != null
-                            ? _formatarData(_checkOut!)
-                            : '—',
-                        aoTocar: _selecionarCheckOut,
+                    const SizedBox(height: DsEspacamentos.md),
+
+                    // ── Datas: Check-in e Check-out ─────────────────────────
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _CampoData(
+                            rotulo: 'Check-in',
+                            valor: state.checkIn != null
+                                ? _formatarData(state.checkIn!)
+                                : '—',
+                            erro: state.erros['checkIn'],
+                            aoTocar: _selecionarCheckIn,
+                          ),
+                        ),
+                        const SizedBox(width: DsEspacamentos.sm),
+                        Expanded(
+                          child: _CampoData(
+                            rotulo: 'Check-out',
+                            valor: state.checkOut != null
+                                ? _formatarData(state.checkOut!)
+                                : '—',
+                            erro: state.erros['checkOut'],
+                            aoTocar: _selecionarCheckOut,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: DsEspacamentos.md),
+
+                    // ── Número de hóspedes e Valor total ───────────────────
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DsTextField(
+                            rotulo: 'Hóspedes',
+                            controlador: _numHospedesCtrl,
+                            tipoTeclado: TextInputType.number,
+                            validador: (v) =>
+                                state.erros['numHospedes'],
+                          ),
+                        ),
+                        const SizedBox(width: DsEspacamentos.sm),
+                        Expanded(
+                          child: DsTextField(
+                            rotulo: 'Valor total (R\$)',
+                            controlador: _valorTotalCtrl,
+                            tipoTeclado: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            validador: (v) =>
+                                state.erros['valorTotal'],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: DsEspacamentos.md),
+
+                    // ── Status ─────────────────────────────────────────────
+                    DsDropdown(
+                      rotulo: 'Status',
+                      opcoes: _opcoesStatus,
+                      valorSelecionado: state.status,
+                      aoSelecionar: _formStore.atualizarStatus,
+                    ),
+                    const SizedBox(height: DsEspacamentos.md),
+
+                    // ── Plataforma ─────────────────────────────────────────
+                    DsDropdown(
+                      rotulo: 'Plataforma',
+                      opcoes: _opcoesPlataforma,
+                      valorSelecionado: state.plataforma,
+                      aoSelecionar: _formStore.atualizarPlataforma,
+                    ),
+
+                    // ── Imóvel (se houver) ─────────────────────────────────
+                    if (widget.imoveis.isNotEmpty) ...[
+                      const SizedBox(height: DsEspacamentos.md),
+                      DsDropdown(
+                        rotulo: 'Selecione o imóvel',
+                        opcoes: widget.imoveis
+                            .map(
+                              (i) => DsOpcaoDropdown(
+                                valor: i.id,
+                                rotulo: i.nome,
+                              ),
+                            )
+                            .toList(),
+                        valorSelecionado: state.imovelId,
+                        aoSelecionar: _formStore.atualizarImovel,
                       ),
+                    ],
+
+                    const SizedBox(height: DsEspacamentos.md),
+
+                    // ── Notas ──────────────────────────────────────────────
+                    DsTextField(
+                      rotulo: 'Notas (opcional)',
+                      controlador: _notasCtrl,
+                      maxLinhas: 3,
+                    ),
+                    const SizedBox(height: DsEspacamentos.lg),
+
+                    // ── Botões: Cancelar e Salvar ──────────────────────────
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: state.salvando
+                              ? null
+                              : () => Navigator.of(context).pop(false),
+                          child: Text(
+                            'Cancelar',
+                            style: DsTipografia.labelLarge.copyWith(
+                              color: DsCores.cinza500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: DsEspacamentos.sm),
+                        DsBotaoPrimario(
+                          rotulo: _edicao
+                              ? 'Salvar alterações'
+                              : 'Criar hospedagem',
+                          carregando: state.salvando,
+                          aoTocar: state.salvando ? null : _salvar,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: DsEspacamentos.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DsTextField(
-                        rotulo: 'Hóspedes',
-                        controlador: _numHospedesCtrl,
-                        tipoTeclado: TextInputType.number,
-                        validador: (v) {
-                          final n = int.tryParse(v ?? '');
-                          if (n == null || n < 1) {
-                            return 'Mínimo 1';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: DsEspacamentos.sm),
-                    Expanded(
-                      child: DsTextField(
-                        rotulo: 'Valor total (R\$)',
-                        controlador: _valorTotalCtrl,
-                        tipoTeclado: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        validador: (v) {
-                          final n = double.tryParse(
-                            (v ?? '').replaceAll(',', '.'),
-                          );
-                          if (n == null || n < 0) {
-                            return 'Valor inválido';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: DsEspacamentos.md),
-                DsDropdown(
-                  rotulo: 'Status',
-                  opcoes: _opcoesStatus,
-                  valorSelecionado: _status?.name,
-                  aoSelecionar: (v) {
-                    if (v != null) {
-                      setState(
-                        () => _status = StatusHospedagem.values.firstWhere(
-                          (e) => e.name == v,
-                        ),
-                      );
-                    }
-                  },
-                ),
-                const SizedBox(height: DsEspacamentos.md),
-                DsDropdown(
-                  rotulo: 'Plataforma',
-                  opcoes: _opcoesPlataforma,
-                  valorSelecionado: _plataforma?.name,
-                  aoSelecionar: (v) {
-                    if (v != null) {
-                      setState(
-                        () => _plataforma = Plataforma.values.firstWhere(
-                          (e) => e.name == v,
-                        ),
-                      );
-                    }
-                  },
-                ),
-                if (widget.imoveis.isNotEmpty) ...[
-                  const SizedBox(height: DsEspacamentos.md),
-                  DsDropdown(
-                    rotulo: 'Selecione o imóvel',
-                    opcoes: widget.imoveis
-                        .map(
-                          (i) => DsOpcaoDropdown(valor: i.id, rotulo: i.nome),
-                        )
-                        .toList(),
-                    valorSelecionado: _imovelId,
-                    aoSelecionar: (v) => setState(() => _imovelId = v),
-                  ),
-                ],
-                const SizedBox(height: DsEspacamentos.md),
-                DsTextField(
-                  rotulo: 'Notas (opcional)',
-                  controlador: _notasCtrl,
-                  maxLinhas: 3,
-                ),
-                const SizedBox(height: DsEspacamentos.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: _salvando
-                          ? null
-                          : () => Navigator.of(context).pop(false),
-                      child: Text(
-                        'Cancelar',
-                        style: DsTipografia.labelLarge.copyWith(
-                          color: DsCores.cinza500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: DsEspacamentos.sm),
-                    DsBotaoPrimario(
-                      rotulo: _edicao
-                          ? 'Salvar alterações'
-                          : 'Criar hospedagem',
-                      carregando: _salvando,
-                      aoTocar: _salvando ? null : _salvar,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -418,45 +374,63 @@ class _CampoData extends StatelessWidget {
     required this.rotulo,
     required this.valor,
     required this.aoTocar,
+    this.erro,
   });
 
   final String rotulo;
   final String valor;
   final VoidCallback aoTocar;
+  final String? erro;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: aoTocar,
-      borderRadius: const BorderRadius.all(
-        Radius.circular(DsEspacamentos.radiusSm),
-      ),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: rotulo,
-          suffixIcon: const Icon(
-            Icons.calendar_today,
-            size: 18,
-            color: DsCores.cinza500,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: aoTocar,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(DsEspacamentos.radiusSm),
           ),
-          border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(DsEspacamentos.radiusSm),
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: rotulo,
+              suffixIcon: const Icon(
+                Icons.calendar_today,
+                size: 18,
+                color: DsCores.cinza500,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(DsEspacamentos.radiusSm),
+                ),
+                borderSide: BorderSide(
+                  color: erro != null ? DsCores.erro : DsCores.cinza300,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(DsEspacamentos.radiusSm),
+                ),
+                borderSide: BorderSide(
+                  color: erro != null ? DsCores.erro : DsCores.cinza300,
+                ),
+              ),
             ),
-            borderSide: BorderSide(color: DsCores.cinza300),
-          ),
-          enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(DsEspacamentos.radiusSm),
+            child: Text(
+              valor,
+              style: DsTipografia.bodyLarge.copyWith(color: DsCores.cinza900),
             ),
-            borderSide: BorderSide(color: DsCores.cinza300),
           ),
         ),
-        child: Text(
-          valor,
-          style: DsTipografia.bodyLarge.copyWith(color: DsCores.cinza900),
-        ),
-      ),
+        if (erro != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            erro!,
+            style: DsTipografia.bodySmall.copyWith(color: DsCores.erro),
+          ),
+        ],
+      ],
     );
   }
 }

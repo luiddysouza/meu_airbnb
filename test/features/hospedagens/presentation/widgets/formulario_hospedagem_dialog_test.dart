@@ -90,7 +90,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: _imoveis,
                 ),
                 child: const Text('Abrir'),
@@ -117,7 +116,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: _imoveis,
                 ),
                 child: const Text('Abrir'),
@@ -150,7 +148,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: [],
                 ),
                 child: const Text('Abrir'),
@@ -179,7 +176,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: _imoveis,
                 ),
                 child: const Text('Abrir'),
@@ -210,7 +206,6 @@ void main() {
                 onPressed: () async {
                   resultado = await FormularioHospedagemDialog.mostrar(
                     ctx,
-                    hospedagemStore: store,
                     imoveis: [],
                   );
                 },
@@ -243,7 +238,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: [],
                 ),
                 child: const Text('Abrir'),
@@ -279,7 +273,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: [],
                 ),
                 child: const Text('Abrir'),
@@ -326,7 +319,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: _imoveis,
                   hospedagem: _hospedagemFixture,
                 ),
@@ -354,7 +346,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: _imoveis,
                   hospedagem: _hospedagemFixture,
                 ),
@@ -384,7 +375,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: [],
                   hospedagem: _hospedagemFixture,
                 ),
@@ -418,7 +408,6 @@ void main() {
               builder: (ctx) => TextButton(
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
-                  hospedagemStore: store,
                   imoveis: _imoveis,
                   hospedagem: _hospedagemFixture,
                 ),
@@ -457,7 +446,6 @@ void main() {
                 builder: (ctx) => TextButton(
                   onPressed: () => FormularioHospedagemDialog.mostrar(
                     ctx,
-                    hospedagemStore: store,
                     imoveis: _imoveis,
                     hospedagem: _hospedagemFixture,
                   ),
@@ -497,7 +485,6 @@ void main() {
                 onPressed: () async {
                   resultado = await FormularioHospedagemDialog.mostrar(
                     ctx,
-                    hospedagemStore: store,
                     imoveis: _imoveis,
                     hospedagem: _hospedagemFixture,
                   );
@@ -521,3 +508,4 @@ void main() {
     });
   });
 }
+

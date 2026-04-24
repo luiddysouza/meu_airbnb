@@ -155,7 +155,6 @@ class WidgetFactory {
               aoEditar: () async {
                 final salvo = await FormularioHospedagemDialog.mostrar(
                   context,
-                  hospedagemStore: hospedagemStore,
                   imoveis: filtroStore.imoveis,
                   hospedagem: h,
                 );
