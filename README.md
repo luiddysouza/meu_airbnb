@@ -121,6 +121,7 @@ packages/design_system/lib/
     ├── cards/     # DsCardHospedagem
     ├── inputs/    # DsTextField
     ├── selectores/# DsDateRangePicker, DsDropdown
+    ├── imagens/   # DsImagemBase64
     ├── listas/    # DsLista, DsListTile
     ├── feedback/  # DsSnackbar, DsEstadoVazio, DsCarregando, DsDialogConfirmacao
     └── layout/    # DsScaffoldResponsivo, DsAppBar
@@ -145,8 +146,10 @@ meu_airbnb/
 │   ├── core/
 │   │   ├── di/          # get_it — injecao.dart
 │   │   ├── erros/       # Failure abstrata + CacheFailure
+│   │   ├── platform/    # Platform Channels (share, conectividade, galeria, biometrica)
 │   │   ├── roteamento/  # go_router (splash → login → /)
 │   │   ├── sdui/        # Engine SDUI (models, parser, renderer, factory, cubit)
+│   │   ├── services/    # Base64IsolateService (encoding em isolate)
 │   │   └── usecases/    # Contrato UseCase<Output, Params>
 │   └── features/
 │       ├── auth/        # AuthStore + LoginPagina + UsuarioEntity
@@ -233,7 +236,7 @@ flutter test --coverage
 cd packages/design_system && flutter test
 ```
 
-**242 testes** cobrindo: use cases, repository impl, MobX stores (com `reaction()`), Cubit (com `bloc_test`), widgets do Design System, WidgetFactory, SDUI parser/renderer, páginas e dialogs.
+**303 testes** cobrindo: use cases, repository impl, MobX stores (com `reaction()`), Cubit (com `bloc_test`), widgets do Design System, WidgetFactory, SDUI parser/renderer, páginas, dialogs e platform channels.
 
 ---
 
@@ -273,6 +276,7 @@ Contexto de arquitetura (carregado automaticamente): `.github/copilot-instructio
 | [docs/SDUI.md](docs/SDUI.md) | Engine SDUI — schema JSON, tipos, como adicionar novos tipos |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, componentes, padrões visuais |
 | [docs/ARQUITETURA.md](docs/ARQUITETURA.md) | Camadas, fluxo de dados, decisões de design |
+| [docs/FORMULARIOS.md](docs/FORMULARIOS.md) | Padrão Blueprint/Ser Humano para formulários reativos com MobX |
 | [docs/DECISOES.md](docs/DECISOES.md) | ADRs — decisões com contexto e alternativas |
 | [docs/PROXIMOS_PASSOS.md](docs/PROXIMOS_PASSOS.md) | Roadmap pós-MVP |
 

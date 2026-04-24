@@ -129,12 +129,56 @@ DsDropdown(
 
 > `DsDropdown` usa `key: ValueKey(valorSelecionado)` internamente para forçar rebuild reativo quando o valor é zerado externamente.
 
+### DsImagemBase64
+
+Widget para exibir imagens a partir de uma string base64. Cobre o ciclo completo de carregamento, exibição e erro.
+
+| Parâmetro | Tipo | Default | Descrição |
+|---|---|---|---|
+| `base64` | `String?` | — | String base64 da imagem. `null` exibe placeholder |
+| `altura` | `double` | `150` | Altura em pixels |
+| `largura` | `double` | `double.infinity` | Largura em pixels |
+| `borderRadius` | `double` | `8` | Raio das bordas arredondadas |
+| `fit` | `BoxFit` | `BoxFit.cover` | Como ajustar a imagem no container |
+| `exibirSkeleton` | `bool` | `true` | Exibe skeleton loading durante decodificação |
+
+**Estados visuais:**
+- **`base64 == null`** → ícone de placeholder centralizado (cinza)
+- **Decodificando** → skeleton animado (se `exibirSkeleton: true`)
+- **Sucesso** → imagem renderizada com `Image.memory()`
+- **Base64 inválido** → ícone de erro centralizado
+
+```dart
+DsImagemBase64(
+  base64: hospedagem.fotoBase64,
+  altura: 200,
+  largura: double.infinity,
+  borderRadius: 12,
+)
+```
+
+**Fluxo completo com seleção de imagem do device:**
+```dart
+// 1. Selecionar arquivo via canal nativo
+final caminho = await GaleriaChannel.selecionarImagem();
+if (caminho == null) return;
+
+// 2. Codificar em base64 no Isolate (não bloqueia a UI)
+final base64 = await Base64IsolateService.encodarImagemBase64(caminho);
+
+// 3. Exibir no widget
+DsImagemBase64(base64: base64, altura: 150, largura: 150)
+```
+
+> A decodificação de base64 → `Uint8List` acontece internamente via `FutureBuilder`, então o widget é sempre `const`-friendly na sua declaração.
+
 ### Estrutura de pastas dos componentes
 
 ```
 packages/design_system/lib/componentes/
 ├── botoes/        DsBotaoPrimario, DsBotaoSecundario, DsBotaoIcone
 ├── cards/         DsCardHospedagem
+├── imagens/       DsImagemBase64
 ├── inputs/        DsTextField
 ├── selectores/    DsDateRangePicker, DsDropdown
 ├── listas/        DsListTile

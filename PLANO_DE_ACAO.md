@@ -354,6 +354,7 @@ meu_airbnb/
 │       │   └── componentes/
 │       │       ├── botoes/            # Primário, secundário, ícone
 │       │       ├── cards/             # Card hospedagem, card genérico
+│       │       ├── imagens/           # DsImagemBase64
 │       │       ├── inputs/            # Text field, form field
 │       │       ├── selectores/        # Date range picker, dropdown
 │       │       ├── listas/            # Lista genérica, list tile
@@ -376,8 +377,15 @@ meu_airbnb/
 │   │   │   └── usecase.dart           # UseCase<Output, Params> → Either
 │   │   ├── di/
 │   │   │   └── injecao.dart           # get_it setup
+│   │   ├── platform/
+│   │   │   ├── share_channel.dart       # Android Share Intent (MethodChannel)
+│   │   │   ├── conectividade_channel.dart # Conectividade online/offline (EventChannel)
+│   │   │   ├── galeria_channel.dart     # Seletor de imagem nativo (MethodChannel)
+│   │   │   └── biometric_channel.dart   # BiometricPrompt (MethodChannel)
 │   │   ├── roteamento/
 │   │   │   └── rotas.dart             # go_router config
+│   │   ├── services/
+│   │   │   └── base64_isolate_service.dart # Encoding base64 em Isolate separado
 │   │   └── sdui/
 │   │       ├── models/
 │   │       │   ├── sdui_node.dart       # Nó da árvore (tipo, props, filhos, ações)
@@ -415,12 +423,16 @@ meu_airbnb/
 │           │       └── obter_imoveis.dart
 │           └── presentation/
 │               ├── stores/
-│               │   ├── hospedagem_store.dart
-│               │   └── filtro_store.dart
-│               ├── paginas/
-│               │   └── hospedagens_pagina.dart
-│               └── widgets/
-│                   └── hospedagem_detalhes.dart
+               │   ├── hospedagem_store.dart      # CRUD + Optimistic State
+               │   ├── hospedagem_form_state.dart # Blueprint imutável do formulário
+               │   ├── hospedagem_form_store.dart # Orquestrador MobX do formulário
+               │   ├── filtro_store.dart          # Filtros + @computed hospedagensFiltradas
+               │   └── conectividade_store.dart   # Assina ConectividadeChannel
+               ├── paginas/
+               │   └── hospedagens_pagina.dart
+               └── widgets/
+                   ├── formulario_hospedagem_dialog.dart
+                   └── ds_compartilhar_hospedagem_button.dart
 │
 ├── widgetbook/
 │   ├── pubspec.yaml
@@ -451,9 +463,11 @@ meu_airbnb/
 │
 ├── docs/
 │   ├── ARQUITETURA.md
+│   ├── DECISOES.md
+│   ├── DESIGN_SYSTEM.md
+│   ├── FORMULARIOS.md
 │   ├── PROXIMOS_PASSOS.md
 │   ├── SDUI.md
-│   ├── DECISOES.md
 │   └── PLANO_DE_ACAO.md              # ← Este arquivo
 │
 ├── pubspec.yaml

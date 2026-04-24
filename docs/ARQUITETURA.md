@@ -107,11 +107,17 @@ UI e estado reativo.
 - `@action void sair()` — reseta o estado
 - Pronto para substituir a lógica mock por chamada de API real
 
+`ConectividadeStore`:
+- `@observable String statusConectividade` — `'online'` ou `'offline'`
+- Assina `ConectividadeChannel.obterStatusStream()` na inicialização
+- Expõe `@computed bool estaOnline` para uso nos widgets
+
 **Páginas e Widgets**
 - `SplashPagina` — exibe logo + `DsCarregando`, redireciona para `/login` após 2 s
 - `LoginPagina` — formulário e-mail + senha com `Observer` no erro e no botão; sucesso redireciona para `/`
 - `HospedagensPagina` — consome `SduiCubit` via `BlocBuilder`
-- `FormularioHospedagemDialog` — cria/edita hospedagem com campos completos, validação obrigatória e loading state
+- `FormularioHospedagemDialog` — cria/edita hospedagem com campos completos, validação obrigatória e loading state; aceita `formStoreOverride` para injeção de store pré-configurado em testes
+- `DsCompartilharHospedagemButton` — botão que monta e compartilha o texto de uma hospedagem via `ShareChannel`
 - Widgets de layout e dados vêm do Design System (`packages/design_system/`)
 
 **Gerenciamento de Formulários — Padrão Blueprint/Ser Humano**
@@ -141,6 +147,31 @@ Benefícios:
 Componente transversal em `lib/core/sdui/`. Processa JSON e monta a árvore de widgets dinamicamente.
 
 Ver documentação detalhada em [SDUI.md](SDUI.md).
+
+---
+
+## Platform Channels — Integração Nativa Android
+
+`lib/core/platform/` contém wrappers sobre os canais de comunicação Flutter ↔ Android. Cada canal é uma classe com métodos estáticos que encapsulam `MethodChannel` / `EventChannel`, com **graceful fallback** para iOS, web e testes via captura de `MissingPluginException`.
+
+> **Regra de segurança**: todos os métodos capturam tanto `PlatformException` (falha no canal) quanto `MissingPluginException` (canal não registrado — testes, web, desktop), retornando um valor padrão seguro em vez de propagar a exceção.
+
+| Arquivo | Canal | Tipo | Responsabilidade |
+|---|---|---|---|
+| `share_channel.dart` | `br.com.meuairbnb.meu_airbnb/share` | MethodChannel | Android Share Intent — compartilha texto/URL via sistema |
+| `conectividade_channel.dart` | `br.com.meuairbnb.meu_airbnb/conectividade` | EventChannel + MethodChannel | Monitor de conectividade — stream `online`/`offline` + estado atual |
+| `galeria_channel.dart` | `br.com.meuairbnb.meu_airbnb/galeria` | MethodChannel | Abre seletor de imagem nativo (ActivityResultContracts) |
+| `biometric_channel.dart` | `br.com.meuairbnb.meu_airbnb/biometric` | MethodChannel | Autenticação biométrica (BiometricPrompt — fingerprint/face) |
+
+### Base64IsolateService
+
+`lib/core/services/base64_isolate_service.dart` — encoding de imagens para base64 em um `Isolate` separado via `Isolate.run()`. Impede bloqueio da UI thread ao processar arquivos grandes (> 5 MB). Trabalha em conjunto com `GaleriaChannel` (seleciona o arquivo) e `DsImagemBase64` (exibe o resultado).
+
+```
+GaleriaChannel.selecionarImagem()   → caminho do arquivo
+  → Base64IsolateService.encodarImagemBase64(caminho)  → String base64 (Isolate)
+    → DsImagemBase64(base64: resultado)                → renderiza no widget
+```
 
 ---
 

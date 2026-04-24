@@ -303,9 +303,58 @@ Usar `Isolate.run(base64Encode)` em `Commit 10` para offload da encoding. Widget
 
 ---
 
+## ADR-012: Platform Channels com graceful fallback via MissingPluginException
+
+**Status**: Aceito
+
+**Contexto**  
+O app usa `MethodChannel` e `EventChannel` para acessar APIs nativas do Android (Share Intent, conectividade, galeria, biometria). Os mesmos canais não estão disponíveis em testes unitários, web e desktop — nestes ambientes, o Flutter lança `MissingPluginException` ao invocar um canal não registrado.
+
+O problema: capturar apenas `PlatformException` (falha no canal registrado) deixa `MissingPluginException` não tratado, derrubando o app em testes e em plataformas não-Android.
+
+**Decisão**  
+Criar wrappers estáticos em `lib/core/platform/` para cada canal. Cada método captura **ambas** as exceções (`PlatformException` E `MissingPluginException`) e retorna um valor padrão seguro:
+
+```dart
+// Exemplo: ShareChannel.compartilharHospedagem()
+try {
+  final resultado = await _platform.invokeMethod<bool>('compartilhar', args);
+  return resultado ?? false;
+} on PlatformException {
+  return false;
+} on MissingPluginException {
+  // Canal não registrado: testes, web, desktop
+  return false;
+}
+```
+
+**Canais implementados:**
+
+| Wrapper | Canal | Fallback |
+|---|---|---|
+| `ShareChannel` | `meu_airbnb/share` | `false` |
+| `ConectividadeChannel` | `meu_airbnb/conectividade` | `'offline'` / stream vazio |
+| `GaleriaChannel` | `meu_airbnb/galeria` | `null` |
+| `BiometricChannel` | `meu_airbnb/biometric` | `false` |
+
+**Alternativas consideradas**
+- `kIsWeb` / `Platform.isAndroid` antes de invocar — verificação por plataforma, mas frágil em testes (onde a variável pode ser `android` mas o canal não está registrado)
+- Interface/abstract class + implementações por plataforma — limpo, mas overhead excessivo para 4 canais simples
+- Injeção de canal via DI para substituir em testes — mais testável, mas adiciona complexidade de setup desnecessária
+
+**Consequências**
+- (+) 303 testes passam sem exceções de canal
+- (+) App funciona em web/desktop sem crash (degrada graciosamente)
+- (+) Fácil de entender: um único ponto de captura por método
+- (+) Zero configuração extra em testes — não precisa de `TestDefaultBinaryMessengerBinding`
+- (-) Dois `catch` por método — ligeiramente mais verboso
+
+---
+
 ## Relação com Documentação
 
 Cada ADR tem documentação detalhada:
 - **ADR-002** → `docs/SDUI.md` (engine SDUI, WidgetFactory)
 - **ADR-010** → `docs/FORMULARIOS.md` (Blueprint/Ser Humano, ciclos de vida)
+- **ADR-011 / ADR-012** → `docs/ARQUITETURA.md` (seção Platform Channels)
 - **ADR-011** → `docs/PROCESSAMENTO_IMAGEM.md` (planejado)
