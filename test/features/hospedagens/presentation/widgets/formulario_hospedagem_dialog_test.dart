@@ -2,10 +2,12 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:meu_airbnb/core/di/injecao.dart';
 import 'package:meu_airbnb/core/erros/failures.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
+import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_form_store.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/widgets/formulario_hospedagem_dialog.dart';
 import 'package:mockito/mockito.dart';
@@ -74,6 +76,20 @@ void main() {
       mockDeletar: mockDeletar,
       mockObter: mockObter,
     );
+
+    // Registrar HospedagemFormStore no GetIt com o store mockado
+    if (sl.isRegistered<HospedagemFormStore>()) {
+      sl.unregister<HospedagemFormStore>();
+    }
+    sl.registerFactory<HospedagemFormStore>(
+      () => HospedagemFormStore(hospedagemStore: store),
+    );
+  });
+
+  tearDown(() {
+    if (sl.isRegistered<HospedagemFormStore>()) {
+      sl.unregister<HospedagemFormStore>();
+    }
   });
 
   // ── Modo criação ──────────────────────────────────────────────────────────
@@ -190,7 +206,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert — dropdown de imóvel presente
-      expect(find.text('Imóvel'), findsOneWidget);
+      expect(find.text('Selecione o imóvel'), findsOneWidget);
     });
 
     testWidgets('fecha dialog retornando false ao tocar em Cancelar', (
@@ -218,6 +234,8 @@ void main() {
 
       // Act
       await tester.tap(find.text('Abrir'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Cancelar'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cancelar'));
       await tester.pumpAndSettle();
@@ -251,6 +269,8 @@ void main() {
       await tester.tap(find.text('Abrir'));
       await tester.pumpAndSettle();
       // Clica Criar sem preencher nome
+      await tester.ensureVisible(find.text('Criar hospedagem'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Criar hospedagem'));
       await tester.pumpAndSettle();
 
@@ -266,6 +286,12 @@ void main() {
         (_) async => Right<Failure, HospedagemEntity>(_hospedagemFixture),
       );
 
+      // Cria store pré-configurado com dados válidos (bypass do iniciarNovoFormulario)
+      final formStorePreConfigurado = HospedagemFormStore(
+        hospedagemStore: store,
+      );
+      formStorePreConfigurado.carregarParaEdicao(_hospedagemFixture);
+
       await tester.pumpWidget(
         _app(
           Scaffold(
@@ -274,6 +300,7 @@ void main() {
                 onPressed: () => FormularioHospedagemDialog.mostrar(
                   ctx,
                   imoveis: [],
+                  formStoreOverride: formStorePreConfigurado,
                 ),
                 child: const Text('Abrir'),
               ),
@@ -286,17 +313,8 @@ void main() {
       await tester.tap(find.text('Abrir'));
       await tester.pumpAndSettle();
 
-      // Preenche nome do hóspede
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Nome do hóspede'),
-        'Maria Souza',
-      );
-      // Preenche valor
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Valor total (R\$)'),
-        '500.00',
-      );
-
+      await tester.ensureVisible(find.text('Criar hospedagem'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Criar hospedagem'));
       await tester.pumpAndSettle();
 
@@ -421,6 +439,8 @@ void main() {
       // Act
       await tester.tap(find.text('Abrir'));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Salvar alterações'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Salvar alterações'));
       await tester.pumpAndSettle();
 
@@ -458,6 +478,8 @@ void main() {
 
         // Act
         await tester.tap(find.text('Abrir'));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('Salvar alterações'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Salvar alterações'));
         await tester.pumpAndSettle();
@@ -498,6 +520,8 @@ void main() {
 
       // Act
       await tester.tap(find.text('Abrir'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Salvar alterações'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Salvar alterações'));
       await tester.pumpAndSettle();

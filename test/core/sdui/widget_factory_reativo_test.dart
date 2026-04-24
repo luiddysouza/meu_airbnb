@@ -11,6 +11,7 @@ import 'package:meu_airbnb/features/hospedagens/domain/entities/enums.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/filtro_store.dart';
+import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_form_store.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
 import 'package:mobx/mobx.dart' hide when;
 import 'package:mockito/mockito.dart';
@@ -72,7 +73,10 @@ void main() {
 
     GetIt.instance
       ..registerSingleton<FiltroStore>(filtroStore)
-      ..registerSingleton<HospedagemStore>(hospedagemStore);
+      ..registerSingleton<HospedagemStore>(hospedagemStore)
+      ..registerFactory<HospedagemFormStore>(
+        () => HospedagemFormStore(hospedagemStore: hospedagemStore),
+      );
   });
 
   tearDown(() {

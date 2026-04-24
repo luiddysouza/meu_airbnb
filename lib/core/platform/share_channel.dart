@@ -40,6 +40,9 @@ class ShareChannel {
       // Se estiver rodando em iOS, web ou simulador sem suporte a Intent
       // Retorna false gracefully sem lançar exceção
       return false;
+    } on MissingPluginException {
+      // Canal não registrado (ex: testes unitários, web, desktop)
+      return false;
     }
   }
 
@@ -71,6 +74,9 @@ class ShareChannel {
     } on PlatformException {
       // Se estiver rodando em iOS, web ou simulador sem suporte a Intent
       // Retorna false gracefully sem lançar exceção
+      return false;
+    } on MissingPluginException {
+      // Canal não registrado (ex: testes unitários, web, desktop)
       return false;
     }
   }

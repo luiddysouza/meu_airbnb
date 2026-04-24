@@ -14,6 +14,7 @@ import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entit
 import 'package:meu_airbnb/features/hospedagens/domain/entities/imovel_entity.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/paginas/hospedagens_pagina.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/filtro_store.dart';
+import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_form_store.dart';
 import 'package:meu_airbnb/features/hospedagens/presentation/stores/hospedagem_store.dart';
 import 'package:mockito/mockito.dart';
 
@@ -95,6 +96,9 @@ void main() {
     GetIt.instance
       ..registerSingleton<HospedagemStore>(hospedagemStore)
       ..registerSingleton<FiltroStore>(filtroStore)
+      ..registerFactory<HospedagemFormStore>(
+        () => HospedagemFormStore(hospedagemStore: hospedagemStore),
+      )
       // Factory retorna sempre o mesmo stub — página usa sl<SduiCubit>() em initState
       ..registerFactory<SduiCubit>(() => sduiCubit);
   });

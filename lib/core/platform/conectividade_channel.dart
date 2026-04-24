@@ -41,6 +41,9 @@ class ConectividadeChannel {
     } on PlatformException {
       // Em iOS/web, retorna offline (não suportado)
       return 'offline';
+    } on MissingPluginException {
+      // Canal não registrado (ex: testes unitários, web, desktop)
+      return 'offline';
     }
   }
 }

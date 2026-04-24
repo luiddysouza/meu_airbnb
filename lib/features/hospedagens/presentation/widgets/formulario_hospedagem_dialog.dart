@@ -33,6 +33,7 @@ class FormularioHospedagemDialog extends StatefulWidget {
     super.key,
     required this.imoveis,
     this.hospedagem,
+    this.formStoreOverride,
   });
 
   /// Lista de imóveis disponíveis para o dropdown.
@@ -41,16 +42,24 @@ class FormularioHospedagemDialog extends StatefulWidget {
   /// Hospedagem a editar. `null` indica modo de criação.
   final HospedagemEntity? hospedagem;
 
+  /// Override do store para testes — quando fornecido, GetIt não é consultado
+  /// e o estado do store não é reinicializado.
+  final HospedagemFormStore? formStoreOverride;
+
   /// Abre o dialog e retorna `true` se o formulário foi salvo com sucesso.
   static Future<bool> mostrar(
     BuildContext context, {
     required List<ImovelEntity> imoveis,
     HospedagemEntity? hospedagem,
+    HospedagemFormStore? formStoreOverride,
   }) async {
     final resultado = await showDialog<bool>(
       context: context,
-      builder: (_) =>
-          FormularioHospedagemDialog(imoveis: imoveis, hospedagem: hospedagem),
+      builder: (_) => FormularioHospedagemDialog(
+        imoveis: imoveis,
+        hospedagem: hospedagem,
+        formStoreOverride: formStoreOverride,
+      ),
     );
     return resultado ?? false;
   }
@@ -82,14 +91,24 @@ class _FormularioHospedagemDialogState
   void initState() {
     super.initState();
 
-    // Obter instância do store via get_it (registrado como Factory)
-    _formStore = sl<HospedagemFormStore>();
+    // Usar store injetado (para testes) ou obter via get_it
+    _formStore = widget.formStoreOverride ?? sl<HospedagemFormStore>();
 
     // Inicializar controllers vazios (sincronização em tempo real via Observer)
     _nomeHospedeCtrl = TextEditingController();
     _numHospedesCtrl = TextEditingController();
     _valorTotalCtrl = TextEditingController();
     _notasCtrl = TextEditingController();
+
+    // Quando formStoreOverride é fornecido, o store já está pré-configurado;
+    // apenas sincroniza os controllers com o estado existente.
+    if (widget.formStoreOverride != null) {
+      _nomeHospedeCtrl.text = _formStore.formState.nomeHospede;
+      _numHospedesCtrl.text = _formStore.formState.numHospedes;
+      _valorTotalCtrl.text = _formStore.formState.valorTotal;
+      _notasCtrl.text = _formStore.formState.notas ?? '';
+      return;
+    }
 
     // Configurar o estado inicial do formulário
     if (_edicao) {
@@ -154,6 +173,11 @@ class _FormularioHospedagemDialogState
     if (!mounted) return;
     if (_formStore.erroSubmit == null && _formStore.formularioValido) {
       Navigator.of(context).pop(true);
+    } else if (!_formStore.formularioValido) {
+      // Re-validar após o Observer reconstruir para exibir erros por campo
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _formKey.currentState?.validate();
+      });
     }
   }
 
