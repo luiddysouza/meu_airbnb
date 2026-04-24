@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 
 import '../../features/auth/presentation/stores/auth_store.dart';
+import '../../features/auth/presentation/stores/biometric_store.dart';
 import '../../features/hospedagens/data/datasources/hospedagem_local_datasource.dart';
 import '../../features/hospedagens/data/repositories/hospedagem_repository_impl.dart';
 import '../../features/hospedagens/domain/repositories/hospedagem_repository.dart';
@@ -68,11 +69,16 @@ Future<void> inicializarDependencias() async {
   // ── 5. Auth Store ───────────────────────────────────────────────────────────
   sl.registerSingleton<AuthStore>(AuthStore());
 
-  // ── 6. Conectividade Store ──────────────────────────────────────────────────
+  // ── 6. Biometric Store ──────────────────────────────────────────────────────
+  final biometricStore = BiometricStore();
+  biometricStore.verificarDisponibilidade(); // Verifica disponibilidade na inicialização
+  sl.registerSingleton<BiometricStore>(biometricStore);
+
+  // ── 7. Conectividade Store ──────────────────────────────────────────────────
   final conectividadeStore = ConectividadeStore();
   conectividadeStore.iniciar(); // Começa a escutar eventos imediatamente
   sl.registerSingleton<ConectividadeStore>(conectividadeStore);
 
-  // ── 7. SduiCubit ───────────────────────────────────────────────────────────
+  // ── 8. SduiCubit ───────────────────────────────────────────────────────────
   sl.registerFactory<SduiCubit>(() => SduiCubit());
 }

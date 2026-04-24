@@ -9,21 +9,25 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.Bundle
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
-/// MainActivity com suporte a MethodChannel para compartilhamento nativo (Intent.ACTION_SEND)
-/// e EventChannel para monitoramento de conectividade
+/// MainActivity com suporte a MethodChannel para compartilhamento nativo (Intent.ACTION_SEND),
+/// EventChannel para monitoramento de conectividade e MethodChannel para autenticação biométrica
 class MainActivity : FlutterActivity() {
   private val CHANNEL = "br.com.meuairbnb.meu_airbnb/share"
   private val CONECTIVIDADE_EVENT_CHANNEL = "br.com.meuairbnb.meu_airbnb/conectividade"
   private val CONECTIVIDADE_METHOD_CHANNEL = "br.com.meuairbnb.meu_airbnb/conectividade/status"
-  
+  private val BIOMETRIC_CHANNEL = "br.com.meuairbnb.meu_airbnb/biometric"
+
   private var eventSink: EventChannel.EventSink? = null
   private var connectivityManager: ConnectivityManager? = null
   private var networkCallback: ConnectivityManager.NetworkCallback? = null
+  private var biometricResult: MethodChannel.Result? = null
 
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
@@ -79,6 +83,32 @@ class MainActivity : FlutterActivity() {
         "obterStatusAtual" -> {
           result.success(obterStatusConectividadeAtual())
         }
+        else -> result.notImplemented()
+      }
+    }
+
+    // MethodChannel para autenticação biométrica
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, BIOMETRIC_CHANNEL).setMethodCallHandler { call, result ->
+      when (call.method) {
+        "autenticar" -> {
+          val titulo = call.argument<String>("titulo") ?: "Autenticar"
+          val subtitulo = call.argument<String>("subtitulo") ?: ""
+          val descricao = call.argument<String>("descricao")
+
+          biometricResult = result
+          mostrarPromptBiometrico(titulo, subtitulo, descricao)
+        }
+
+        "isBiometricoDisponivel" -> {
+          val disponivel = verificarDisponibilidadeBiometria()
+          result.success(disponivel)
+        }
+
+        "getTipoBiometrico" -> {
+          val tipo = obterTipoBiometrico()
+          result.success(tipo)
+        }
+
         else -> result.notImplemented()
       }
     }
@@ -248,6 +278,87 @@ class MainActivity : FlutterActivity() {
   private fun enviarStatusConectividade() {
     val status = obterStatusConectividadeAtual()
     eventSink?.success(status)
+  }
+
+  /// Verifica se dispositivo possui sensores biométricos disponíveis.
+  /// Retorna true se há fingerprint OU face, false caso contrário.
+  private fun verificarDisponibilidadeBiometria(): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+      // BiometricManager está disponível a partir de API 29
+      return false
+    }
+
+    val biometricManager = BiometricManager.from(this)
+
+    return biometricManager.canAuthenticate(
+      BiometricManager.Authenticators.BIOMETRIC_STRONG
+    ) == BiometricManager.BIOMETRIC_SUCCESS
+  }
+
+  /// Obtém tipo de sensor biométrico disponível.
+  /// Retorna: "fingerprint", "face", "ambos" ou "nenhum"
+  private fun obterTipoBiometrico(): String {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+      return "nenhum"
+    }
+
+    val biometricManager = BiometricManager.from(this)
+
+    val podeFingerprint = biometricManager.canAuthenticate(
+      BiometricManager.Authenticators.BIOMETRIC_WEAK
+    ) == BiometricManager.BIOMETRIC_SUCCESS
+
+    // Não há forma nativa de distinguir face de fingerprint no BiometricManager
+    // Vamos retornar o que está disponível
+    return if (podeFingerprint) {
+      "fingerprint" // Simplificado: retorna fingerprint como padrão
+    } else {
+      "nenhum"
+    }
+  }
+
+  /// Exibe BiometricPrompt nativo para autenticação.
+  /// Chama biometricResult.success(true) em sucesso ou success(false) em cancelamento.
+  private fun mostrarPromptBiometrico(
+    titulo: String,
+    subtitulo: String,
+    descricao: String?
+  ) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+      // BiometricPrompt requer API 28+
+      biometricResult?.success(false)
+      return
+    }
+
+    val biometricPrompt = BiometricPrompt(this, {
+      // Executor para rodar callbacks na main thread
+    }, object : BiometricPrompt.AuthenticationCallback() {
+      override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+        super.onAuthenticationSucceeded(result)
+        biometricResult?.success(true)
+      }
+
+      override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+        super.onAuthenticationError(errorCode, errString)
+        // Inclui cancelamento do usuário
+        biometricResult?.success(false)
+      }
+
+      override fun onAuthenticationFailed() {
+        super.onAuthenticationFailed()
+        biometricResult?.success(false)
+      }
+    })
+
+    val promptInfo = BiometricPrompt.PromptInfo.Builder()
+      .setTitle(titulo)
+      .setSubtitle(subtitulo)
+      .setDescription(descricao)
+      .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+      .setNegativeButtonText("Cancelar")
+      .build()
+
+    biometricPrompt.authenticate(promptInfo)
   }
 }
 

@@ -44,4 +44,6 @@
     </queries>
     <!-- Permissões para conectividade -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Permissão para autenticação biométrica -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 </manifest>
