@@ -5,6 +5,7 @@ import '../../tokens/espacamentos.dart';
 import '../../tokens/icones.dart';
 import '../../tokens/sombras.dart';
 import '../../tokens/tipografia.dart';
+import '../imagens/ds_imagem_base64.dart';
 
 enum StatusHospedagemDs { confirmada, pendente, cancelada, concluida }
 
@@ -17,6 +18,7 @@ class DsCardHospedagem extends StatelessWidget {
     required this.status,
     required this.valorTotal,
     this.nomeImovel,
+    this.base64,
     this.aoTocar,
     this.aoEditar,
     this.aoDeletar,
@@ -28,6 +30,7 @@ class DsCardHospedagem extends StatelessWidget {
   final StatusHospedagemDs status;
   final double valorTotal;
   final String? nomeImovel;
+  final String? base64;
   final VoidCallback? aoTocar;
   final VoidCallback? aoEditar;
   final VoidCallback? aoDeletar;
@@ -58,6 +61,15 @@ class DsCardHospedagem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (base64 != null) ...[
+              DsImagemBase64(
+                base64: base64,
+                altura: 150,
+                largura: double.infinity,
+                borderRadius: DsEspacamentos.radiusMd,
+              ),
+              const SizedBox(height: DsEspacamentos.md),
+            ],
             _buildCabecalho(),
             const SizedBox(height: DsEspacamentos.sm),
             _buildDatas(),

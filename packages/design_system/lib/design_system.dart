@@ -19,6 +19,9 @@ export 'componentes/botoes/ds_botao_icone.dart';
 // Componentes — Cards
 export 'componentes/cards/ds_card_hospedagem.dart';
 
+// Componentes — Imagens
+export 'componentes/imagens/ds_imagem_base64.dart';
+
 // Componentes — Inputs
 export 'componentes/inputs/ds_text_field.dart';
 

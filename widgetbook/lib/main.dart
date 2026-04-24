@@ -4,6 +4,7 @@ import 'package:widgetbook/widgetbook.dart';
 
 import 'catalogos/botoes.dart';
 import 'catalogos/exibicao.dart';
+import 'catalogos/imagens.dart';
 import 'catalogos/inputs.dart';
 import 'catalogos/layout.dart';
 import 'catalogos/selectores.dart';
@@ -27,6 +28,7 @@ class _Catalogo extends StatelessWidget {
         inputsFolder,
         seletoresFolder,
         exibicaoFolder,
+        imagensFolder,
         layoutFolder,
       ],
     );
