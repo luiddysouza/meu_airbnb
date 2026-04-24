@@ -104,10 +104,8 @@ void main() {
           Scaffold(
             body: Builder(
               builder: (ctx) => TextButton(
-                onPressed: () => FormularioHospedagemDialog.mostrar(
-                  ctx,
-                  imoveis: _imoveis,
-                ),
+                onPressed: () =>
+                    FormularioHospedagemDialog.mostrar(ctx, imoveis: _imoveis),
                 child: const Text('Abrir'),
               ),
             ),
@@ -130,10 +128,8 @@ void main() {
           Scaffold(
             body: Builder(
               builder: (ctx) => TextButton(
-                onPressed: () => FormularioHospedagemDialog.mostrar(
-                  ctx,
-                  imoveis: _imoveis,
-                ),
+                onPressed: () =>
+                    FormularioHospedagemDialog.mostrar(ctx, imoveis: _imoveis),
                 child: const Text('Abrir'),
               ),
             ),
@@ -162,10 +158,8 @@ void main() {
           Scaffold(
             body: Builder(
               builder: (ctx) => TextButton(
-                onPressed: () => FormularioHospedagemDialog.mostrar(
-                  ctx,
-                  imoveis: [],
-                ),
+                onPressed: () =>
+                    FormularioHospedagemDialog.mostrar(ctx, imoveis: []),
                 child: const Text('Abrir'),
               ),
             ),
@@ -190,10 +184,8 @@ void main() {
           Scaffold(
             body: Builder(
               builder: (ctx) => TextButton(
-                onPressed: () => FormularioHospedagemDialog.mostrar(
-                  ctx,
-                  imoveis: _imoveis,
-                ),
+                onPressed: () =>
+                    FormularioHospedagemDialog.mostrar(ctx, imoveis: _imoveis),
                 child: const Text('Abrir'),
               ),
             ),
@@ -254,10 +246,8 @@ void main() {
           Scaffold(
             body: Builder(
               builder: (ctx) => TextButton(
-                onPressed: () => FormularioHospedagemDialog.mostrar(
-                  ctx,
-                  imoveis: [],
-                ),
+                onPressed: () =>
+                    FormularioHospedagemDialog.mostrar(ctx, imoveis: []),
                 child: const Text('Abrir'),
               ),
             ),
@@ -532,4 +522,3 @@ void main() {
     });
   });
 }
-
