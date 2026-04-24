@@ -223,3 +223,89 @@ Realizar uma auditoria sistemática e corrigir todas as fragilidades em 7 commit
 - (+) Conteúdo desktop respeitado até 1440px de largura máxima
 - (+) Checklist de novo componente atualizado: proíbe literais numéricos
 - (-) Dependência de rede para `google_fonts` no primeiro carregamento (offline: fonte de sistema como fallback)
+
+---
+
+## ADR-010: Padrão Blueprint/Ser Humano para formulários
+
+**Status**: Aceito
+
+**Contexto**  
+Formulários reativos (hospedagens, imoveis) precisavam gerenciar estado que pode estar incompleto, inválido ou em transição. A alternativa tradicional (state no widget) é frágil; state no store inteiro é acoplado e difícil de testar.
+
+A questão central: onde vive o estado do formulário durante edição, e como garantir que nunca se persista dados inválidos?
+
+**Decisão**  
+Padrão **Blueprint/Ser Humano** em dois níveis:
+
+1. **HospedagemFormState** (Equatable + imutável) — blueprint (bluepadrão pode estar incompleto)
+   - Campos como `String` (aceita input inválido, ex: `numHospedes = "abc"`)
+   - `Map<String, String> erros` — erros validação
+   - `bool valido` — pode ser convertido em entidade?
+   - `copyWith()` + `validate()` → nova instância com erros preenchidos
+   - `toEntity(id)` — converte para `HospedagemEntity` ou falha com `StateError`
+
+2. **HospedagemFormStore** (MobX) — orquestrador
+   - `@observable HospedagemFormState formState` — único observable
+   - `@action atualizarX(...)` — copyWith + validate
+   - `@action salvar()` — toEntity + persistência via use case + tratamento de erro
+
+3. **HospedagemEntity** (Domain) — Ser Humano (sempre válido)
+   - Campos tipados corretamente (`int numHospedes`, `double valorTotal`, `StatusHospedagem status`)
+   - Apenas entidades válidas podem existir no domínio
+
+**Alternativas consideradas**
+
+1. State no Widget + Provider — simples para forms simples, mas frágil: perder dados ao pop/push, sem reuso de lógica
+2. Store com múltiplos @observables (`nomeHospede`, `numHospedes`, `validacoes`, ...) — reativo, mas explosão de observables; difícil sincronizar validações
+3. Store com `ViewModel` imutável — similar ao blueprint, mas sem separação clara entre transitório (form) e persistível (entity)
+4. JSON serialization direto — `toJson()`/`fromJson()` em Entity — mistura responsabilidades; Entity se torna bag of data
+5. StatefulWidget autossuficiente com `autovalidateMode` — Flutter padrão, mas validação prematura, perda de dados no pop
+
+**Consequências**
+
+- (+) Garantia de tipo: impossível persistir `numHospedes = "abc"` ou `valido = true` com erros preenchidos
+- (+) Imutabilidade: cada ação de usuário cria novo state → histórico perfeito para debugging, undo/redo futuro
+- (+) Reatividade limpa: um único `@observable` simplifica; MobX não fica saturado
+- (+) Testabilidade: `HospedagemFormState` é Equatable puro (29 testes sem mock); `HospedagemFormStore` mocka só HospedagemStore (34 testes com 100% cobertura)
+- (+) Reutilização: `carregarParaEdicao()` + `iniciarNovoFormulario()` rápido; mesmo padrão em múltiplos formulários
+- (+) UX: validação não é mostrada prematuramente (campo `sujo` controla); erro de submit aparece após tentar salvar
+- (+) Portfólio: demonstra compreensão de padrões funcionais (imutabilidade, Either, validação bipolarizada)
+
+- (-) Curva de aprendizado: desenvoltor acostumado com forms simples vê "over-engineering" inicial
+- (-) Boilerplate: `copyWith()`, `validate()`, `toEntity()`, `fromEntity()` em cada form novo
+- (-) Dependência de MobX + Equatable (mas aceito pois já usados em outros contextos)
+
+---
+
+## ADR-011: Gerenciamento de imagens com Isolate.run() para base64
+
+**Status**: Planejado (Commit 10)
+
+**Contexto**  
+Hospedagens podem ter foto. Capturar da câmera ou galeria produz `Uint8List`. Encoding para base64 é CPU-bound (~10-50ms em imagens médias); bloqueia a UI thread.
+
+**Decisão**  
+Usar `Isolate.run(base64Encode)` em `Commit 10` para offload da encoding. Widget `DsImagemBase64` renderiza o base64 via `Image.memory(base64Decode(...))` com skeleton loading.
+
+**Alternativas consideradas**
+- `compute()` (flutter.foundation) — wrapper sobre Isolate, mais simples, mas menos controle
+- Base64 síncrono com `Future.microtask()` — ainda bloqueia UI
+- Enviar original `Uint8List` para backend — fora de escopo (sem backend real)
+
+**Consequências**
+- (+) Base64 encoding não trava UI
+- (+) Demonstra concorrência em Dart/Flutter (portfolio)
+- (+) Isolate.run() é o padrão moderno (1.5+ preferível a `compute()`)
+
+- (-) Overhead de isolate para imagens pequeninhas (<1MB) é mínimo mas perceptível
+- (-) Erro em isolate é mais verboso de debugar
+
+---
+
+## Relação com Documentação
+
+Cada ADR tem documentação detalhada:
+- **ADR-002** → `docs/SDUI.md` (engine SDUI, WidgetFactory)
+- **ADR-010** → `docs/FORMULARIOS.md` (Blueprint/Ser Humano, ciclos de vida)
+- **ADR-011** → `docs/PROCESSAMENTO_IMAGEM.md` (planejado)

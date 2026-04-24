@@ -114,6 +114,28 @@ UI e estado reativo.
 - `FormularioHospedagemDialog` — cria/edita hospedagem com campos completos, validação obrigatória e loading state
 - Widgets de layout e dados vêm do Design System (`packages/design_system/`)
 
+**Gerenciamento de Formulários — Padrão Blueprint/Ser Humano**
+
+Formulários reativos seguem o padrão **Blueprint/Ser Humano** (ver [FORMULARIOS.md](FORMULARIOS.md) para detalhes):
+
+- **HospedagemFormState** — estado transitório (incompleto, pode ter erros)
+  - Equatable e imutável
+  - Campos como `String` para aceitar input inválido
+  - `validate()` retorna novo state com erros preenchidos
+  - `toEntity(id)` converte para entidade ou falha com `StateError`
+
+- **HospedagemFormStore** (MobX) — orquestrador
+  - Um único `@observable HospedagemFormState formState`
+  - Actions para atualizar cada campo (com revalidação automática)
+  - `salvar()` com persistência via `HospedagemStore` + tratamento de erro
+  - Testes: 100% cobertura (29 casos para FormState, 34 para FormStore)
+
+Benefícios:
+- Garantia de tipo — impossível persistir dados inválidos
+- Reatividade simples — um único observable, não explosão de campos
+- Testável isoladamente — FormState é puro (sem DI, mocks)
+- UX melhorada — validação não é mostrada prematuramente
+
 ### SDUI Engine
 
 Componente transversal em `lib/core/sdui/`. Processa JSON e monta a árvore de widgets dinamicamente.
