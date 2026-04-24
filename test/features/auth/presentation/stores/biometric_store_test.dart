@@ -56,10 +56,7 @@ void main() {
       test('autenticando deve ser observável', () {
         final store = BiometricStore();
         var chamadas = 0;
-        final disposer = reaction(
-          (_) => store.autenticando,
-          (_) => chamadas++,
-        );
+        final disposer = reaction((_) => store.autenticando, (_) => chamadas++);
         expect(chamadas, 0);
         // Mudar valor diretamente para testar observabilidade
         store.autenticando = true;
@@ -70,10 +67,7 @@ void main() {
       test('disponivel deve ser observável', () {
         final store = BiometricStore();
         var chamadas = 0;
-        final disposer = reaction(
-          (_) => store.disponivel,
-          (_) => chamadas++,
-        );
+        final disposer = reaction((_) => store.disponivel, (_) => chamadas++);
         store.disponivel = true;
         disposer();
         expect(chamadas, greaterThan(0));
@@ -94,10 +88,7 @@ void main() {
       test('erro deve ser observável', () {
         final store = BiometricStore();
         var chamadas = 0;
-        final disposer = reaction(
-          (_) => store.erro,
-          (_) => chamadas++,
-        );
+        final disposer = reaction((_) => store.erro, (_) => chamadas++);
         store.erro = 'novo erro';
         disposer();
         expect(chamadas, greaterThan(0));
@@ -105,45 +96,36 @@ void main() {
     });
 
     group('Métodos assíncronos', () {
-      test(
-        'verificarDisponibilidade retorna Future completo',
-        () async {
-          final store = BiometricStore();
-          // Este teste apenas verifica que o método não lança exceção não-capturada
-          // e que os observables são atualizados (gracefully para false/nenhum em teste)
-          await store.verificarDisponibilidade();
-          expect(store.disponivel, isFalse);
-        },
-      );
+      test('verificarDisponibilidade retorna Future completo', () async {
+        final store = BiometricStore();
+        // Este teste apenas verifica que o método não lança exceção não-capturada
+        // e que os observables são atualizados (gracefully para false/nenhum em teste)
+        await store.verificarDisponibilidade();
+        expect(store.disponivel, isFalse);
+      });
 
-      test(
-        'autenticar retorna Future completo',
-        () async {
-          final store = BiometricStore();
-          try {
-            await store.autenticar(titulo: 'Teste', subtitulo: 'Teste');
-          } catch (e) {
-            // Esperado lançar em teste (sem impl nativa)
-            expect(e, isNotNull);
-          }
-        },
-      );
+      test('autenticar retorna Future completo', () async {
+        final store = BiometricStore();
+        try {
+          await store.autenticar(titulo: 'Teste', subtitulo: 'Teste');
+        } catch (e) {
+          // Esperado lançar em teste (sem impl nativa)
+          expect(e, isNotNull);
+        }
+      });
 
-      test(
-        'autenticar com descricao completa',
-        () async {
-          final store = BiometricStore();
-          try {
-            await store.autenticar(
-              titulo: 'Teste',
-              subtitulo: 'Teste',
-              descricao: 'Descrição',
-            );
-          } catch (e) {
-            expect(e, isNotNull);
-          }
-        },
-      );
+      test('autenticar com descricao completa', () async {
+        final store = BiometricStore();
+        try {
+          await store.autenticar(
+            titulo: 'Teste',
+            subtitulo: 'Teste',
+            descricao: 'Descrição',
+          );
+        } catch (e) {
+          expect(e, isNotNull);
+        }
+      });
     });
 
     group('Estados de Erro', () {

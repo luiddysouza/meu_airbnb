@@ -41,14 +41,11 @@ class BiometricChannel {
     String? descricao,
   }) async {
     try {
-      final resultado = await _platform.invokeMethod<bool>(
-        'autenticar',
-        {
-          'titulo': titulo,
-          'subtitulo': subtitulo,
-          'descricao': descricao,
-        },
-      );
+      final resultado = await _platform.invokeMethod<bool>('autenticar', {
+        'titulo': titulo,
+        'subtitulo': subtitulo,
+        'descricao': descricao,
+      });
       return resultado ?? false;
     } on PlatformException {
       // Em iOS/web: sem suporte a biometria

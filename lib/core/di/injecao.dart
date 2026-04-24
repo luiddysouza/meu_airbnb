@@ -71,7 +71,8 @@ Future<void> inicializarDependencias() async {
 
   // ── 6. Biometric Store ──────────────────────────────────────────────────────
   final biometricStore = BiometricStore();
-  biometricStore.verificarDisponibilidade(); // Verifica disponibilidade na inicialização
+  biometricStore
+      .verificarDisponibilidade(); // Verifica disponibilidade na inicialização
   sl.registerSingleton<BiometricStore>(biometricStore);
 
   // ── 7. Conectividade Store ──────────────────────────────────────────────────

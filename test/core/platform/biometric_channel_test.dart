@@ -40,10 +40,7 @@ void main() {
       });
 
       test('deve ser uma função callable', () {
-        expect(
-          BiometricChannel.isBiometricoDisponivel,
-          isA<Function>(),
-        );
+        expect(BiometricChannel.isBiometricoDisponivel, isA<Function>());
       });
     });
 
@@ -53,10 +50,7 @@ void main() {
       });
 
       test('deve ser uma função callable', () {
-        expect(
-          BiometricChannel.getTipoBiometrico,
-          isA<Function>(),
-        );
+        expect(BiometricChannel.getTipoBiometrico, isA<Function>());
       });
     });
 
@@ -65,10 +59,7 @@ void main() {
         // Verifica que o método existe e pode ser chamado
         // (em teste, sem impl nativa, vai falhar no runtime, mas sintaxe é válida)
         expect(
-          () => BiometricChannel.autenticar(
-            titulo: 'Test',
-            subtitulo: 'Test',
-          ),
+          () => BiometricChannel.autenticar(titulo: 'Test', subtitulo: 'Test'),
           isNotNull,
         );
       });
