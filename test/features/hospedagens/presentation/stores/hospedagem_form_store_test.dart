@@ -344,7 +344,8 @@ void main() {
     test('atualiza fotoBase64', () {
       // Arrange
       formStore.iniciarNovoFormulario();
-      const base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const base64 =
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
       // Act
       formStore.atualizarFotoBase64(base64);
@@ -358,7 +359,8 @@ void main() {
   group('HospedagemFormStore — removerFoto()', () {
     test('marca como sujo ao remover fotoBase64', () {
       // Arrange
-      const base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const base64 =
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
       formStore.formState = HospedagemFormState(fotoBase64: base64);
 
       // Act
@@ -448,7 +450,9 @@ void main() {
       ).validate();
 
       const erroMessage = 'Erro ao salvar hospedagem';
-      mi.when(mockHospedagemStore.adicionarHospedagem(mi.any)).thenAnswer((_) async {});
+      mi
+          .when(mockHospedagemStore.adicionarHospedagem(mi.any))
+          .thenAnswer((_) async {});
       mi.when(mockHospedagemStore.erro).thenReturn(erroMessage);
 
       // Act
@@ -473,7 +477,8 @@ void main() {
         imovelId: 'imovel-1',
       ).validate();
 
-      mi.when(mockHospedagemStore.adicionarHospedagem(mi.any))
+      mi
+          .when(mockHospedagemStore.adicionarHospedagem(mi.any))
           .thenAnswer((_) => Future.delayed(const Duration(milliseconds: 100)));
       mi.when(mockHospedagemStore.erro).thenReturn(null);
 
@@ -498,7 +503,8 @@ void main() {
         imovelId: 'imovel-1',
       ).validate();
 
-      mi.when(mockHospedagemStore.adicionarHospedagem(mi.any))
+      mi
+          .when(mockHospedagemStore.adicionarHospedagem(mi.any))
           .thenThrow(Exception('Erro inesperado'));
 
       // Act

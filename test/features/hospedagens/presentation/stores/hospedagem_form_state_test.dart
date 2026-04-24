@@ -44,10 +44,7 @@ void main() {
       // Assert
       expect(validado.valido, isFalse);
       expect(validado.erros['nomeHospede'], isNotNull);
-      expect(
-        validado.erros['nomeHospede'],
-        contains('nome'),
-      );
+      expect(validado.erros['nomeHospede'], contains('nome'));
     });
 
     test('erro quando checkIn é null', () {
@@ -110,10 +107,7 @@ void main() {
       // Assert
       expect(validado.valido, isFalse);
       expect(validado.erros['checkOut'], isNotNull);
-      expect(
-        validado.erros['checkOut'],
-        contains('após'),
-      );
+      expect(validado.erros['checkOut'], contains('após'));
     });
 
     test('erro quando numHospedes é 0', () {
@@ -378,10 +372,7 @@ void main() {
       final entity = validado.toEntity(id: 'hospedagem-1');
 
       // Assert — verifica se criadoEm está próximo de agora (diferença < 1 segundo)
-      expect(
-        entity.criadoEm.difference(agora).inSeconds.abs(),
-        lessThan(1),
-      );
+      expect(entity.criadoEm.difference(agora).inSeconds.abs(), lessThan(1));
     });
 
     test('seta imovelId como string vazia se null', () {

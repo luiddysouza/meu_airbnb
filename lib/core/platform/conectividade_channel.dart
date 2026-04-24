@@ -13,7 +13,7 @@ class ConectividadeChannel {
 
   /// Stream de eventos de conectividade.
   /// Emite strings: 'online' ou 'offline'.
-  /// 
+  ///
   /// Uso:
   /// ```dart
   /// ConectividadeChannel.obterStatusStream().listen((status) {
@@ -26,7 +26,7 @@ class ConectividadeChannel {
 
   /// Obtém o status atual de conectividade.
   /// Retorna 'online' ou 'offline'.
-  /// 
+  ///
   /// Uso:
   /// ```dart
   /// final status = await ConectividadeChannel.obterStatusAtual();

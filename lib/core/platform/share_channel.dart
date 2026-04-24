@@ -1,22 +1,22 @@
 import 'package:flutter/services.dart';
 
 /// Interface para compartilhamento nativo via Intent (Android)
-/// 
+///
 /// Permite compartilhar dados de hospedagens via sistema nativo de sharing,
 /// disparando Intent.ACTION_SEND para abrir app selecionado pelo usuário.
 class ShareChannel {
   static const _platform = MethodChannel('br.com.meuairbnb.meu_airbnb/share');
 
   /// Compartilha hospedagem através do Intent nativo do Android.
-  /// 
+  ///
   /// Parâmetros:
   /// - [titulo]: Título da hospedagem (ex: "Casa na Praia - Bahia")
   /// - [descricao]: Descrição completa para compartilhar
   /// - [url]: URL opcional para adicionar ao texto (futuro: deep link)
-  /// 
+  ///
   /// Lança [PlatformException] se o canal não responder (ex: em iOS ou web).
   /// Em caso de sucesso, retorna true; false se usuário cancelar.
-  /// 
+  ///
   /// Exemplo:
   /// ```dart
   /// await ShareChannel.compartilharHospedagem(
@@ -33,11 +33,7 @@ class ShareChannel {
     try {
       final resultado = await _platform.invokeMethod<bool>(
         'compartilharHospedagem',
-        {
-          'titulo': titulo,
-          'descricao': descricao,
-          'url': url,
-        },
+        {'titulo': titulo, 'descricao': descricao, 'url': url},
       );
       return resultado ?? false;
     } on PlatformException {
@@ -48,10 +44,10 @@ class ShareChannel {
   }
 
   /// Compartilha múltiplas hospedagens em um texto formatado.
-  /// 
+  ///
   /// Agrupa informações de hospedagens em um único texto bem formatado.
   /// Útil para compartilhar lista de opções ou roteiro.
-  /// 
+  ///
   /// Exemplo:
   /// ```dart
   /// await ShareChannel.compartilharLista(
@@ -69,10 +65,7 @@ class ShareChannel {
     try {
       final resultado = await _platform.invokeMethod<bool>(
         'compartilharLista',
-        {
-          'titulo': titulo,
-          'hospedagens': hospedagens,
-        },
+        {'titulo': titulo, 'hospedagens': hospedagens},
       );
       return resultado ?? false;
     } on PlatformException {

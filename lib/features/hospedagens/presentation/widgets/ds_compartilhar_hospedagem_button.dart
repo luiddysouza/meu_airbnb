@@ -3,10 +3,10 @@ import 'package:meu_airbnb/core/platform/share_channel.dart';
 import 'package:meu_airbnb/features/hospedagens/domain/entities/hospedagem_entity.dart';
 
 /// Widget para compartilhar uma hospedagem via Intent nativo do Android.
-/// 
+///
 /// Integra-se com o MethodChannel `br.com.meuairbnb.meu_airbnb/share`.
 /// Em plataformas não-suportadas (iOS, web), desabilita silenciosamente.
-/// 
+///
 /// Exemplo de uso em um card:
 /// ```dart
 /// DsCompartilharHospedagemButton(
@@ -50,7 +50,9 @@ class _DsCompartilharHospedagemButtonState
               ),
             )
           : const Icon(Icons.share),
-      label: _carregando ? const Text('Compartilhando...') : const Text('Compartilhar'),
+      label: _carregando
+          ? const Text('Compartilhando...')
+          : const Text('Compartilhar'),
     );
   }
 
@@ -83,9 +85,9 @@ class _DsCompartilharHospedagemButtonState
       if (mounted) {
         setState(() => _carregando = false);
         widget.onErro?.call(e.toString());
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao compartilhar: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao compartilhar: $e')));
       }
     }
   }
