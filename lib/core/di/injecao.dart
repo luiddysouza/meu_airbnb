@@ -10,6 +10,7 @@ import '../../features/hospedagens/domain/usecases/deletar_hospedagem.dart';
 import '../../features/hospedagens/domain/usecases/obter_hospedagens.dart';
 import '../../features/hospedagens/domain/usecases/obter_imoveis.dart';
 import '../../features/hospedagens/presentation/stores/filtro_store.dart';
+import '../../features/hospedagens/presentation/stores/hospedagem_form_store.dart';
 import '../../features/hospedagens/presentation/stores/hospedagem_store.dart';
 import '../sdui/cubit/sdui_cubit.dart';
 
@@ -57,6 +58,11 @@ Future<void> inicializarDependencias() async {
   // Conecta o FiltroStore à lista reativa do HospedagemStore.
   filtroStore.todasHospedagens = sl<HospedagemStore>().hospedagens;
   sl.registerSingleton<FiltroStore>(filtroStore);
+
+  // HospedagemFormStore é registrado como factory (nova instância por dialog aberto)
+  sl.registerFactory<HospedagemFormStore>(
+    () => HospedagemFormStore(hospedagemStore: sl<HospedagemStore>()),
+  );
 
   // ── 5. Auth Store ───────────────────────────────────────────────────────────
   sl.registerSingleton<AuthStore>(AuthStore());
