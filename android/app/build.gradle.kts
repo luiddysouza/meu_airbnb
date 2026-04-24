@@ -42,3 +42,10 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Biometric: BiometricManager + BiometricPrompt
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+    // Activity KTX: registerForActivityResult + ActivityResultContracts
+    implementation("androidx.activity:activity-ktx:1.9.3")
+}

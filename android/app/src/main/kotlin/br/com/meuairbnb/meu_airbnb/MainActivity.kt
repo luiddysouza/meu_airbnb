@@ -13,7 +13,8 @@ import android.provider.MediaStore
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
-import io.flutter.embedding.android.FlutterActivity
+import androidx.core.content.ContextCompat
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
@@ -21,7 +22,7 @@ import io.flutter.plugin.common.MethodChannel
 /// MainActivity com suporte a MethodChannel para compartilhamento nativo (Intent.ACTION_SEND),
 /// EventChannel para monitoramento de conectividade, MethodChannel para autenticação biométrica
 /// e MethodChannel para seleção de imagens via galeria
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
   private val CHANNEL = "br.com.meuairbnb.meu_airbnb/share"
   private val CONECTIVIDADE_EVENT_CHANNEL = "br.com.meuairbnb.meu_airbnb/conectividade"
   private val CONECTIVIDADE_METHOD_CHANNEL = "br.com.meuairbnb.meu_airbnb/conectividade/status"
@@ -36,7 +37,7 @@ class MainActivity : FlutterActivity() {
 
   private val galeriaLauncher = registerForActivityResult(
     ActivityResultContracts.GetContent()
-  ) { uri ->
+  ) { uri: android.net.Uri? ->
     if (uri != null) {
       // Converter URI para caminho absoluto
       val caminho = obterCaminhoAbsolutoDoUri(uri)
@@ -247,12 +248,12 @@ class MainActivity : FlutterActivity() {
       networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
           super.onAvailable(network)
-          enviarStatusConectividade()
+          runOnUiThread { enviarStatusConectividade() }
         }
 
         override fun onLost(network: Network) {
           super.onLost(network)
-          enviarStatusConectividade()
+          runOnUiThread { enviarStatusConectividade() }
         }
 
         override fun onCapabilitiesChanged(
@@ -260,7 +261,7 @@ class MainActivity : FlutterActivity() {
           networkCapabilities: NetworkCapabilities
         ) {
           super.onCapabilitiesChanged(network, networkCapabilities)
-          enviarStatusConectividade()
+          runOnUiThread { enviarStatusConectividade() }
         }
       }
 
@@ -366,9 +367,7 @@ class MainActivity : FlutterActivity() {
       return
     }
 
-    val biometricPrompt = BiometricPrompt(this, {
-      // Executor para rodar callbacks na main thread
-    }, object : BiometricPrompt.AuthenticationCallback() {
+    val biometricPrompt = BiometricPrompt(this, ContextCompat.getMainExecutor(this), object : BiometricPrompt.AuthenticationCallback() {
       override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
         super.onAuthenticationSucceeded(result)
         biometricResult?.success(true)
