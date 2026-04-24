@@ -9,6 +9,8 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import io.flutter.embedding.android.FlutterActivity
@@ -17,17 +19,34 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 /// MainActivity com suporte a MethodChannel para compartilhamento nativo (Intent.ACTION_SEND),
-/// EventChannel para monitoramento de conectividade e MethodChannel para autenticação biométrica
+/// EventChannel para monitoramento de conectividade, MethodChannel para autenticação biométrica
+/// e MethodChannel para seleção de imagens via galeria
 class MainActivity : FlutterActivity() {
   private val CHANNEL = "br.com.meuairbnb.meu_airbnb/share"
   private val CONECTIVIDADE_EVENT_CHANNEL = "br.com.meuairbnb.meu_airbnb/conectividade"
   private val CONECTIVIDADE_METHOD_CHANNEL = "br.com.meuairbnb.meu_airbnb/conectividade/status"
   private val BIOMETRIC_CHANNEL = "br.com.meuairbnb.meu_airbnb/biometric"
+  private val GALERIA_CHANNEL = "br.com.meuairbnb.meu_airbnb/galeria"
 
   private var eventSink: EventChannel.EventSink? = null
   private var connectivityManager: ConnectivityManager? = null
   private var networkCallback: ConnectivityManager.NetworkCallback? = null
   private var biometricResult: MethodChannel.Result? = null
+  private var galeriaResult: MethodChannel.Result? = null
+
+  private val galeriaLauncher = registerForActivityResult(
+    ActivityResultContracts.GetContent()
+  ) { uri ->
+    if (uri != null) {
+      // Converter URI para caminho absoluto
+      val caminho = obterCaminhoAbsolutoDoUri(uri)
+      galeriaResult?.success(caminho)
+    } else {
+      // Usuário cancelou
+      galeriaResult?.success(null)
+    }
+    galeriaResult = null
+  }
 
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
@@ -107,6 +126,23 @@ class MainActivity : FlutterActivity() {
         "getTipoBiometrico" -> {
           val tipo = obterTipoBiometrico()
           result.success(tipo)
+        }
+
+        else -> result.notImplemented()
+      }
+    }
+
+    // MethodChannel para seleção de imagens via galeria
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, GALERIA_CHANNEL).setMethodCallHandler { call, result ->
+      when (call.method) {
+        "selecionarImagem" -> {
+          galeriaResult = result
+          galeriaLauncher.launch("image/*")
+        }
+
+        "isGaleriaDisponivel" -> {
+          // Em Android com ActivityResultContracts, sempre disponível
+          result.success(true)
         }
 
         else -> result.notImplemented()
@@ -359,6 +395,28 @@ class MainActivity : FlutterActivity() {
       .build()
 
     biometricPrompt.authenticate(promptInfo)
+  }
+
+  /// Converte URI de arquivo em caminho absoluto.
+  /// Suporta content:// URIs do ContentProvider.
+  /// Retorna caminho absoluto (/data/...) ou null se falha.
+  private fun obterCaminhoAbsolutoDoUri(uri: android.net.Uri): String? {
+    return try {
+      val proj = arrayOf(MediaStore.Images.Media.DATA)
+      val cursor = contentResolver.query(uri, proj, null, null, null)
+
+      if (cursor != null && cursor.moveToFirst()) {
+        val colIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+        val caminho = cursor.getString(colIndex)
+        cursor.close()
+        caminho
+      } else {
+        uri.path
+      }
+    } catch (e: Exception) {
+      android.util.Log.e("GaleriaChannel", "Erro ao obter caminho: ${e.message}")
+      uri.path
+    }
   }
 }
 
